@@ -2,112 +2,136 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Participant;
 use App\Models\TournamentPool;
 use App\Models\Schedule;
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class TournamentPoolController extends Controller
 {
     /**
-     * Generate pool dan seed peserta (pengelompokan peserta berdasarkan kelas)
+     * Generate pool berdasarkan category, gender, dan weight_class
      */
     public function generate($competitionId)
     {
-        // 1️⃣ Ambil semua peserta yang disetujui
+        // 1️⃣ Ambil peserta yang sudah disetujui
         $participants = Participant::where('competition_id', $competitionId)
             ->where('validation_status', 'approved')
-            ->orderBy('id')
             ->get();
 
         if ($participants->isEmpty()) {
-            return back()->with('error', 'Tidak ada peserta dengan status approved untuk turnamen ini.');
+            return back()->with('error', 'Tidak ada peserta approved untuk kompetisi ini.');
         }
 
-        // 2️⃣ Kelompokkan peserta berdasarkan kontingen
-        $groupedByKontingen = $participants->groupBy('kontingen');
+        // 2️⃣ Tentukan kelas berat hanya untuk validasi (tanpa menyimpan ke database)
+        foreach ($participants as $participant) {
+            $class = $participant->weight_class; // gunakan nilai asli dari DB
+            $category = $participant->category;
+            $weight = $participant->weight;
+            $gender = strtoupper($participant->gender);
 
-        // 3️⃣ Distribusikan peserta secara round-robin agar kontingen tersebar
-        $distributedParticipants = collect();
+            // Jika weight_class kosong, tentukan sementara (TIDAK DISIMPAN)
+            if (empty($class) || $class === 'UNDEF') {
+                switch ($category) {
+                    case 'USIA DINI (SD)':
+                        if ($weight >= 26 && $weight <= 28) $class = 'A';
+                        elseif ($weight > 28 && $weight <= 30) $class = 'B';
+                        elseif ($weight > 30 && $weight <= 32) $class = 'C';
+                        elseif ($weight > 32 && $weight <= 34) $class = 'D';
+                        elseif ($weight > 34 && $weight <= 36) $class = 'E';
+                        elseif ($weight > 36 && $weight <= 38) $class = 'F';
+                        elseif ($weight > 38 && $weight <= 40) $class = 'G';
+                        elseif ($weight > 40 && $weight <= 42) $class = 'H';
+                        elseif ($weight > 42 && $weight <= 44) $class = 'I';
+                        break;
 
-        while ($groupedByKontingen->flatten()->isNotEmpty()) {
-            foreach ($groupedByKontingen as $kontingen => $group) {
-                if ($group->isNotEmpty()) {
-                    $distributedParticipants->push($group->shift());
+                    case 'PRA REMAJA (SMP)':
+                        if ($weight >= 30 && $weight <= 33) $class = 'A';
+                        elseif ($weight > 33 && $weight <= 36) $class = 'B';
+                        elseif ($weight > 36 && $weight <= 39) $class = 'C';
+                        elseif ($weight > 39 && $weight <= 42) $class = 'D';
+                        elseif ($weight > 42 && $weight <= 45) $class = 'E';
+                        elseif ($weight > 45 && $weight <= 48) $class = 'F';
+                        elseif ($weight > 48 && $weight <= 51) $class = 'G';
+                        elseif ($weight > 51 && $weight <= 54) $class = 'H';
+                        elseif ($weight > 54 && $weight <= 57) $class = 'I';
+                        break;
+
+                    case 'REMAJA (SMA/K/MA)':
+                        if ($weight >= 39 && $weight <= 43) $class = 'A';
+                        elseif ($weight > 43 && $weight <= 47) $class = 'B';
+                        elseif ($weight > 47 && $weight <= 51) $class = 'C';
+                        elseif ($weight > 51 && $weight <= 55) $class = 'D';
+                        elseif ($weight > 55 && $weight <= 59) $class = 'E';
+                        elseif ($weight > 59 && $weight <= 63) $class = 'F';
+                        elseif ($weight > 63 && $weight <= 67) $class = 'G';
+                        elseif ($weight > 67 && $weight <= 71) $class = 'H';
+                        elseif ($weight > 71 && $weight <= 75) $class = 'I';
+                        break;
+
+                    case 'DEWASA (MAHASISWA/UMUM)':
+                        if ($gender == 'L') {
+                            if ($weight >= 45 && $weight <= 50) $class = 'A';
+                            elseif ($weight > 50 && $weight <= 55) $class = 'B';
+                            elseif ($weight > 55 && $weight <= 60) $class = 'C';
+                            elseif ($weight > 60 && $weight <= 65) $class = 'D';
+                            elseif ($weight > 65 && $weight <= 70) $class = 'E';
+                            elseif ($weight > 70 && $weight <= 75) $class = 'F';
+                            elseif ($weight > 75 && $weight <= 80) $class = 'G';
+                            elseif ($weight > 80 && $weight <= 85) $class = 'H';
+                            elseif ($weight > 85 && $weight <= 90) $class = 'I';
+                            elseif ($weight > 90 && $weight <= 95) $class = 'J';
+                        } elseif ($gender == 'P') {
+                            if ($weight >= 45 && $weight <= 50) $class = 'A';
+                            elseif ($weight > 50 && $weight <= 55) $class = 'B';
+                            elseif ($weight > 55 && $weight <= 60) $class = 'C';
+                            elseif ($weight > 60 && $weight <= 65) $class = 'D';
+                            elseif ($weight > 65 && $weight <= 70) $class = 'E';
+                            elseif ($weight > 70 && $weight <= 75) $class = 'F';
+                        }
+                        break;
                 }
+
+                // Tidak menyimpan, hanya menambahkan properti sementara
+                $participant->temp_weight_class = $class ?? 'UNDEF';
+            } else {
+                $participant->temp_weight_class = $class;
             }
         }
 
-        // 4️⃣ Tentukan jumlah pool & ukuran pool otomatis
-        $totalParticipants = $distributedParticipants->count();
-
-        // Tentukan ukuran pool (bisa kamu ubah sesuai kebutuhan)
-        if ($totalParticipants <= 8) {
-            $poolSize = $totalParticipants; // semua di 1 pool
-        } elseif ($totalParticipants <= 16) {
-            $poolSize = 8;
-        } elseif ($totalParticipants <= 32) {
-            $poolSize = 8;
-        } elseif ($totalParticipants <= 64) {
-            $poolSize = 8;
-        } else {
-            $poolSize = 16; // jika besar sekali
-        }
-
-        $totalPools = ceil($totalParticipants / $poolSize);
-
-        // 5️⃣ Hapus pool lama untuk kompetisi ini
+        // 3️⃣ Hapus pool lama
         TournamentPool::where('competition_id', $competitionId)->delete();
 
-        // 6️⃣ Bagi peserta secara merata ke dalam pool
-        $poolIndex = 1;
-        $seedOrder = 1;
-        $currentPoolCounts = array_fill(1, $totalPools, 0);
+        // 4️⃣ Kelompokkan berdasarkan gender + category + weight_class (dari temp)
+        $grouped = $participants->groupBy(fn($p) => "{$p->gender}-{$p->category}-{$p->temp_weight_class}");
 
-        foreach ($distributedParticipants as $participant) {
-            TournamentPool::create([
-                'competition_id' => $competitionId,
-                'participant_id' => $participant->id,
-                'pool' => $poolIndex,
-                'seed_order' => $seedOrder++,
-            ]);
+        $poolCount = 0;
+        foreach ($grouped as $key => $group) {
+            $poolCount++;
+            $seedOrder = 1;
 
-            $currentPoolCounts[$poolIndex]++;
-
-            // Geser ke pool berikutnya (round-robin)
-            $poolIndex++;
-            if ($poolIndex > $totalPools) {
-                $poolIndex = 1;
+            foreach ($group as $participant) {
+                TournamentPool::create([
+                    'competition_id' => $competitionId,
+                    'participant_id' => $participant->id,
+                    'pool' => $poolCount, // setiap kombinasi unik menjadi 1 pool
+                    'seed_order' => $seedOrder++,
+                ]);
             }
         }
 
-
-        // 7️⃣ (Opsional) Cek apakah masih ada kontingen ganda di pool yang sama
-        $pools = TournamentPool::where('competition_id', $competitionId)
-            ->get()
-            ->groupBy('pool');
-
-        $duplicateReport = [];
-        foreach ($pools as $poolNumber => $poolMembers) {
-            $duplicates = $poolMembers->groupBy(fn($m) => $m->participant->kontingen)
-                ->filter(fn($g) => $g->count() > 1);
-            if ($duplicates->isNotEmpty()) {
-                $duplicateReport[$poolNumber] = $duplicates->keys()->toArray();
-            }
-        }
-
-        // 8️⃣ Sampaikan hasil
-        if (!empty($duplicateReport)) {
-            return redirect()->route('admin.jadwal.pool', ['competitionId' => $competitionId])->with('warning', 'Beberapa pool memiliki peserta dari kontingen sama. Sistem sudah berusaha mendistribusi sebaik mungkin.');
-        }
-
-        return redirect()->route('admin.jadwal.pool', ['competitionId' => $competitionId])->with('success', "Berhasil membentuk {$totalPools} pool dengan pembagian seimbang dan distribusi kontingen yang adil! Lanjutkan dengan membuat jadwal pertandingan.");
+        return redirect()->route('admin.jadwal.pool', ['competitionId' => $competitionId])
+            ->with('success', "Berhasil membentuk {$poolCount} pool berdasarkan gender, kategori, dan kelas berat tanpa mengubah data peserta.");
     }
 
-    // fungsi membuat jadwal otomatis
+
+    /**
+     * Generate jadwal otomatis berdasarkan pool yang sudah terbentuk
+     */
     public function generateMatches($competitionId)
     {
-        // 1️⃣ Ambil semua pool untuk kompetisi ini
+        // Ambil semua pool
         $pools = TournamentPool::where('competition_id', $competitionId)
             ->with('participant')
             ->get()
@@ -117,37 +141,34 @@ class TournamentPoolController extends Controller
             return back()->with('error', 'Belum ada pool yang terbentuk untuk kompetisi ini.');
         }
 
-        // 2️⃣ Hapus jadwal lama agar tidak duplikat
+        // Hapus jadwal lama
         Schedule::where('competition_id', $competitionId)->delete();
 
         $matchesCreated = 0;
         $round = 1;
 
-        // 3️⃣ Loop tiap pool
         foreach ($pools as $poolName => $participants) {
-            $participants = $participants->shuffle(); // acak urutan agar lebih adil
+            $participants = $participants->shuffle();
 
-            // Jika jumlah peserta ganjil, tambahkan "bye" (peserta langsung lolos)
+            // Jika ganjil, tambahkan bye
             if ($participants->count() % 2 !== 0) {
                 $participants->push(null);
             }
 
-            // 4️⃣ Buat pasangan pertandingan (participant1 vs participant2)
             for ($i = 0; $i < $participants->count(); $i += 2) {
                 $p1 = $participants[$i];
                 $p2 = $participants[$i + 1];
 
-                // Jika ada "bye" (p2 == null)
                 if (is_null($p2)) {
-                    // Peserta tanpa lawan => langsung lolos ke ronde berikutnya
+                    // langsung menang
                     Schedule::create([
                         'competition_id' => $competitionId,
                         'pool_id' => $p1->id,
                         'participant1_id' => $p1->participant_id,
                         'participant2_id' => null,
-                        'winner_id' => $p1->participant_id, // langsung menang
-                        'round' => 2, // langsung ke ronde berikutnya
-                        'arena' => $poolName ?? 'A',
+                        'winner_id' => $p1->participant_id,
+                        'round' => $round + 1,
+                        'arena' => $poolName,
                         'match_time' => now()->addDays(1),
                     ]);
                     continue;
@@ -159,13 +180,15 @@ class TournamentPoolController extends Controller
                     'participant1_id' => $p1->participant_id,
                     'participant2_id' => $p2->participant_id,
                     'round' => $round,
-                    'arena' => $poolName ?? 'A',
+                    'arena' => $poolName,
                     'match_time' => now()->addDays(1),
                 ]);
 
                 $matchesCreated++;
             }
         }
-        return redirect()->route('admin.jadwal.view',['competitionId' => $competitionId])->with('success', "Berhasil membuat {$matchesCreated} jadwal pertandingan untuk kompetisi ini!");
+
+        return redirect()->route('admin.jadwal.view', ['competitionId' => $competitionId])
+            ->with('success', "Berhasil membuat {$matchesCreated} jadwal pertandingan berdasarkan pool.");
     }
 }

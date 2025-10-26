@@ -83,7 +83,7 @@
                     <h3 class="text-md font-semibold text-red-800 mb-2">Pool {{ $poolName }}</h3>
                     <ul class="list-disc list-inside text-gray-700">
                         @foreach ($group as $p)
-                            <li>{{ $p->participant->full_name }} : {{ $p->participant->weight_class }}</li>
+                            <li>{{ $p->participant->full_name }} : {{ $p->participant->weight_class }} : {{ $p->participant->category }}</li>
                         @endforeach
                     </ul>
                 </div>

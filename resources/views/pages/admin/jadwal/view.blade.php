@@ -436,10 +436,177 @@
         </div>
     @endif
 
+    <!-- Add/Edit Schedule Modal -->
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-red-900 to-orange-800 p-6 rounded-t-xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="uil uil-calendar-alt text-yellow-400 text-3xl mr-3"></i>
+                        <span id="modalTitle">Tambah Jadwal Pertandingan</span>
+                    </h3>
+                    <button onclick="closeScheduleModal()" class="text-white hover:text-gray-200 transition">
+                        <i class="uil uil-times text-3xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form id="scheduleForm" action="{{ route('admin.jadwal.store') }}" method="POST" class="p-6">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="POST">
+                <input type="hidden" name="id" id="scheduleId">
+
+                <div class="space-y-4">
+                    <!-- Competition -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Lomba <span class="text-red-600">*</span>
+                        </label>
+                        <select name="competition_id" id="competition_id"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent bg-white"
+                            required onchange="loadParticipants(this.value)">
+                            <option value="">Pilih Lomba</option>
+                            @foreach ($competitions ?? [] as $competition)
+                                <option value="{{ $competition->id }}">{{ $competition->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Participant 1 -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Peserta 1 <span class="text-red-600">*</span>
+                            </label>
+                            <select name="participant1_id" id="participant1_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent bg-white"
+                                required>
+                                <option value="">Pilih Peserta</option>
+                            </select>
+                        </div>
+
+                        <!-- Participant 2 -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Peserta 2 <span class="text-red-600">*</span>
+                            </label>
+                            <select name="participant2_id" id="participant2_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent bg-white"
+                                required>
+                                <option value="">Pilih Peserta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <!-- Round -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Ronde <span class="text-red-600">*</span>
+                            </label>
+                            <select name="round" id="round"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent bg-white"
+                                required>
+                                <option value="1">Ronde 1</option>
+                                <option value="2">Ronde 2</option>
+                                <option value="3">Ronde 3</option>
+                                <option value="4">Semi Final</option>
+                                <option value="5">Final</option>
+                            </select>
+                        </div>
+
+                        <!-- Arena -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Arena <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" name="arena" id="arena" placeholder="Contoh: A1, B2"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent"
+                                required>
+                        </div>
+
+                        <!-- Match Time -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Waktu <span class="text-red-600">*</span>
+                            </label>
+                            <input type="datetime-local" name="match_time" id="match_time"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <div class="flex">
+                            <i class="uil uil-info-circle text-blue-500 text-xl mr-3"></i>
+                            <p class="text-sm text-blue-700">
+                                Pastikan kedua peserta berada dalam kategori dan kelas berat yang sama untuk
+                                pertandingan yang adil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeScheduleModal()"
+                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-3 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-semibold">
+                        <i class="uil uil-check mr-2"></i>
+                        Simpan Jadwal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div id="winnerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 rounded-t-xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="uil uil-trophy text-yellow-300 text-3xl mr-3"></i>
+                        Set Pemenang
+                    </h3>
+                    <button onclick="closeWinnerModal()" class="text-white hover:text-gray-200 transition">
+                        <i class="uil uil-times text-3xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form id="winnerForm" method="POST" class="p-6">
+                @csrf
+                @method('PATCH')
+
+                <p class="text-gray-600 mb-4">Pilih pemenang dari pertandingan ini:</p>
+
+                <div id="winnerOptions" class="space-y-3">
+                    <!-- Options will be loaded dynamically -->
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeWinnerModal()"
+                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                        <i class="uil uil-check mr-2"></i>
+                        Simpan Pemenang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Auto-hide alerts
         setTimeout(() => {
-            const alerts = ['successAlert', 'errorAlert'];
+            const alerts = ['success', 'error'];
             alerts.forEach(id => {
                 const alert = document.getElementById(id);
                 if (alert) {

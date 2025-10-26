@@ -24,7 +24,7 @@ class JadwalController extends Controller
             ->orderBy('competition_date', 'desc')
             ->get();
 
-        return view('pages.admin.jadwal1', compact('competitions'));
+        return view('pages.admin.jadwal', compact('competitions'));
     }
 
     public function index1(Request $request)
@@ -57,7 +57,7 @@ class JadwalController extends Controller
         // Get all competitions for filter
         $competitions = Competition::where('status', '!=', 'selesai')->get();
 
-        return view('pages.admin.jadwal', compact(
+        return view('pages.admin.jadwal2', compact(
             'schedulesByRound',
             'totalMatches',
             'todayMatches',
@@ -225,7 +225,7 @@ class JadwalController extends Controller
 
         $schedule->delete();
 
-        return redirect()->route('admin.jadwal.index')
+        return redirect()->route('admin.jadwal.view', ['competitionId' => $schedule->competition_id])
             ->with('success', 'Jadwal pertandingan berhasil dihapus!');
     }
 
@@ -296,7 +296,7 @@ class JadwalController extends Controller
 
         $schedule->update(['winner_id' => $validated['winner_id']]);
 
-        return redirect()->route('admin.jadwal.index')
+        return redirect()->route('admin.jadwal.view', ['competitionId' => $schedule->competition_id])
             ->with('success', 'Pemenang pertandingan berhasil disimpan!');
     }
 

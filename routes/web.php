@@ -75,20 +75,13 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::delete('/admin/jadwal/{id}', [JadwalController::class, 'destroy'])->name('admin.jadwal.destroy');
 
     // Get participants by competition
-    Route::get('/admin/jadwal/participants/{competition_id}', [JadwalController::class, 'getParticipants'])
-        ->name('jadwal.participants');
-
+    Route::get('/admin/jadwal/participants/{competition_id}', [JadwalController::class, 'getParticipants'])->name('jadwal.participants');
     // Get match details
-    Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'getMatchDetails'])
-        ->name('jadwal.details');
-
+    Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'getMatchDetails'])->name('jadwal.details');
     // Set winner
-    Route::patch('/admin/jadwal/{id}/winner', [JadwalController::class, 'setWinner'])
-        ->name('jadwal.winner');
-
+    Route::patch('/admin/jadwal/{id}/winner', [JadwalController::class, 'setWinner'])->name('jadwal.winner');
     // Generate bracket (optional)
-    Route::post('/admin/jadwal/generate-bracket', [JadwalController::class, 'generateBracket'])
-        ->name('jadwal.generate');
+    Route::post('/admin/jadwal/generate-bracket', [JadwalController::class, 'generateBracket'])->name('jadwal.generate');
 });
 
 // peserta
