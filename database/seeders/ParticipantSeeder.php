@@ -49,7 +49,7 @@ class ParticipantSeeder extends Seeder
             }
 
             Participant::create([
-                'user_id' => '2',
+                'user_id' => '2 && 3',
                 'competition_id' => '1',
                 // 'user_id' => $faker->randomElement($userIds),
                 // 'competition_id' => $faker->randomElement($competitionIds),
