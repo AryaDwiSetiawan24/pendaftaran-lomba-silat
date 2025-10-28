@@ -4,18 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Competition;
 use App\Models\Participant;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ParticipantsExport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use App\Exports\ParticipantsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
 class ParticipantsController extends Controller
 {
     // Metode Admin
-    /**
-     * Menampilkan halaman daftar peserta dengan filter dan statistik.
-     */
+    // Menampilkan halaman daftar peserta dengan filter dan statistik.
     public function peserta(Request $request)
     {
         // Ambil data untuk filter dropdown
@@ -35,7 +34,8 @@ class ParticipantsController extends Controller
             $q->where(function ($subq) use ($search) {
                 $subq->where('full_name', 'like', "%{$search}%")
                     ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%");
+                    ->orWhere('phone_number', 'like', "%{$search}%")
+                    ->orWhere('kontingen', 'like', "%{$search}%");
             });
         });
 
@@ -60,7 +60,7 @@ class ParticipantsController extends Controller
         });
 
         // Ambil hasil dengan paginasi
-        $peserta = $query->latest()->paginate(15)->withQueryString(); // withQueryString agar filter tetap ada saat ganti halaman
+        $peserta = $query->latest()->paginate(15)->withQueryString();
 
         return view('pages.admin.peserta', compact(
             'peserta',
@@ -180,7 +180,7 @@ class ParticipantsController extends Controller
         $participants = auth()->user()->participants()
             ->with('competition')
             ->latest()
-            ->get();
+            ->paginate(20);
 
         return view('pages.peserta.lomba.pendaftaran-peserta', compact('participants'));
     }
@@ -194,11 +194,42 @@ class ParticipantsController extends Controller
         return view('pages.peserta.lomba.pendaftaran-show', compact('participant'));
     }
 
-    // Detail lomba
-    public function show($competition_id)
+    // Detail lomba dan peserta saya
+    public function show(Request $request, $competition_id)
     {
-        $competition = Competition::with('participants')->findOrFail($competition_id);
-        return view('pages.peserta.lomba.show', compact('competition'));
+        // Query untuk mengambil data lomba dan statistik peserta
+        $competition = Competition::withCount('participants')->findOrFail($competition_id);
+        $categoryCounts = Participant::where('competition_id', $competition_id)
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->pluck('total', 'category');
+
+        // Ambil input pencarian
+        $search = $request->input('search');
+
+        // Mulai query untuk peserta milik user
+        $myParticipantsQuery = Participant::where('competition_id', $competition_id)
+            ->where('user_id', auth()->id());
+
+        // Jika ada input pencarian, tambahkan kondisi WHERE
+        if ($search) {
+            $myParticipantsQuery->where(function ($query) use ($search) {
+                $query->where('full_name', 'LIKE', "%{$search}%")
+                    ->orWhere('nik', 'LIKE', "%{$search}%")
+                    ->orWhere('phone_number', 'LIKE', "%{$search}%")
+                    ->orWhere('kontingen', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Terapkan urutan dan paginasi, lalu tambahkan query string ke link paginasi
+        $myParticipants = $myParticipantsQuery->latest()->paginate(10, ['*'], 'peserta_page')
+            ->appends($request->query());
+
+        return view('pages.peserta.lomba.show', compact(
+            'competition',
+            'myParticipants',
+            'categoryCounts'
+        ));
     }
 
     // Form pendaftaran

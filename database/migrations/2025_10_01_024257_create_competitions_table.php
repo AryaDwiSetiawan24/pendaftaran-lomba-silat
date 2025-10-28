@@ -19,6 +19,7 @@ return new class extends Migration
             $table->dateTime('registration_start_date');
             $table->dateTime('registration_end_date');
             $table->enum('status', ['akan_datang', 'dibuka', 'ditutup', 'selesai'])->default('akan_datang');
+            $table->boolean('visible_schedule')->default(false);
             $table->string('competition_logo')->nullable();
             $table->timestamps();
         });

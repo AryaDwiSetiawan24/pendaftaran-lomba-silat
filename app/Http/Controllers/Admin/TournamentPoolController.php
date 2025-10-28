@@ -125,7 +125,6 @@ class TournamentPoolController extends Controller
             ->with('success', "Berhasil membentuk {$poolCount} pool berdasarkan gender, kategori, dan kelas berat tanpa mengubah data peserta.");
     }
 
-
     /**
      * Generate jadwal otomatis berdasarkan pool yang sudah terbentuk
      */

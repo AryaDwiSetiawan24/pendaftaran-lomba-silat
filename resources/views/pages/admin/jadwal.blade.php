@@ -17,7 +17,7 @@
             </div>
 
             <!-- Filter/Search Area (Optional) -->
-            <div class="flex gap-3">
+            {{-- <div class="flex gap-3">
                 <select
                     class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent text-sm">
                     <option value="">Semua Status</option>
@@ -25,7 +25,7 @@
                     <option value="akan_datang">Akan Datang</option>
                     <option value="ditutup">Ditutup</option>
                 </select>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -82,7 +82,7 @@
                             <div class="flex items-center justify-center mb-2">
                                 <i class="uil uil-trophy text-2xl text-yellow-600"></i>
                             </div>
-                            <p class="text-2xl font-bold text-gray-900">{{ $competition->matches_count ?? 0 }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalMatches[$competition->id] ?? 0 }}</p>
                             <p class="text-xs text-gray-600 mt-1">Pertandingan</p>
                         </div>
                     </div>
@@ -93,7 +93,7 @@
                         <a href="{{ route('admin.jadwal.pool', $competition->id) }}"
                             class="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                             <i class="uil uil-sitemap mr-2 text-base"></i>
-                            <span>Kelola Pool</span>
+                            <span>Kelola Grup</span>
                         </a>
 
                         <!-- Lihat Jadwal -->
@@ -107,18 +107,28 @@
                     <!-- Additional Quick Actions -->
                     <div class="mt-4 pt-4 border-t border-gray-200">
                         <div class="flex items-center justify-between text-xs">
-                            <a href="#" class="text-gray-600 hover:text-red-900 transition flex items-center">
+                            <a href="{{ route('admin.jadwal.export.excel') }}"
+                                class="text-gray-600 hover:text-red-900 transition flex items-center">
                                 <i class="uil uil-download-alt mr-1"></i>
                                 Export Jadwal
                             </a>
-                            <a href="#" class="text-gray-600 hover:text-red-900 transition flex items-center">
+                            <form action="{{ route('admin.lomba.toggleVisibility', $competition->id) }}"
+                                method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                    class="px-3 py-1 rounded {{ $competition->visible_schedule ? 'bg-gray-300 text-gray-800' : 'bg-green-600 text-white' }}">
+                                    {{ $competition->visible_schedule ? 'Sembunyikan Jadwal' : 'Tampilkan ke Peserta' }}
+                                </button>
+                            </form>
+                            {{-- <a href="#" class="text-gray-600 hover:text-red-900 transition flex items-center">
                                 <i class="uil uil-print mr-1"></i>
                                 Cetak
                             </a>
                             <a href="#" class="text-gray-600 hover:text-red-900 transition flex items-center">
                                 <i class="uil uil-chart-line mr-1"></i>
                                 Statistik
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                 </div>

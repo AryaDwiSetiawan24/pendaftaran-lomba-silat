@@ -21,12 +21,14 @@
             <main class="flex-1">
                 <!-- Content area -->
                 <div class="p-4 lg:ml-60 md:ml-60 sm:p-6 md:p-8">
+                    <!-- Alert -->
+                    <x-alert />
+
                     {{ $slot }}
                 </div>
             </main>
         </div>
     </div>
-
 </body>
 
 </html>

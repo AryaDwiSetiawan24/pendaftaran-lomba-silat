@@ -20,7 +20,8 @@ class ParticipantSeeder extends Seeder
         $faker = Faker::create('id_ID');
 
         // Pastikan sudah ada user dan competition di database
-        $userIds = User::pluck('id')->all();
+        // $userIds = User::pluck('id')->all();
+        $userIds = [1, 2];
         $competitionIds = Competition::pluck('id')->all();
 
         if (empty($userIds) || empty($competitionIds)) {
@@ -49,9 +50,9 @@ class ParticipantSeeder extends Seeder
             }
 
             Participant::create([
-                'user_id' => '2 && 3',
+                'user_id' => $faker->randomElement($userIds),
+                // 'user_id' => '2',
                 'competition_id' => '1',
-                // 'user_id' => $faker->randomElement($userIds),
                 // 'competition_id' => $faker->randomElement($competitionIds),
                 'kontingen' => 'Kontingen ' . $faker->city,
                 'full_name' => $faker->name($gender == 'L' ? 'male' : 'female'),

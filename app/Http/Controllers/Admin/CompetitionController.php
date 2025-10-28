@@ -24,7 +24,6 @@ class CompetitionController extends Controller
         // Ambil data, urutkan dari terbaru, dan paginasi (10 per halaman)
         $competitions = $query->latest()->paginate(10);
 
-        // Kirim data ke view 'admin.lomba.index'
         return view('pages.admin.lomba', compact('competitions', 'search'));
     }
 
@@ -126,5 +125,15 @@ class CompetitionController extends Controller
 
         return redirect()->route('admin.lomba')
             ->with('success', 'Lomba berhasil dihapus.');
+    }
+
+    // mengubah visibilitas jadwal lomba
+    public function toggleVisibility($id)
+    {
+        $competition = Competition::findOrFail($id);
+        $competition->visible_schedule = !$competition->visible_schedule;
+        $competition->save();
+
+        return back()->with('success', 'Visibilitas jadwal berhasil diperbarui.');
     }
 }

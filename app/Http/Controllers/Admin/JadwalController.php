@@ -8,8 +8,11 @@ use App\Models\Competition;
 use App\Models\Participant;
 use Illuminate\Http\Request;
 use App\Models\TournamentPool;
+use App\Exports\SchedulesExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class JadwalController extends Controller
 {
@@ -24,7 +27,25 @@ class JadwalController extends Controller
             ->orderBy('competition_date', 'desc')
             ->get();
 
-        return view('pages.admin.jadwal', compact('competitions'));
+        // Hitung total pertandingan untuk setiap kompetisi
+        $totalMatches = [];
+        foreach ($competitions as $competition) {
+            $totalMatches[$competition->id] = Schedule::where('competition_id', $competition->id)->count();
+        }
+
+        return view('pages.admin.jadwal', compact('competitions', 'totalMatches'));
+    }
+
+    /**
+     * Handle permintaan untuk men-download jadwal sebagai file Excel.
+     */
+    public function exportExcel()
+    {
+        // Tentukan nama file saat di-download
+        $fileName = 'jadwal_pertandingan_' . date('Y-m-d') . '.xlsx';
+
+        // Panggil fungsi download dari Maatwebsite\Excel
+        return Excel::download(new SchedulesExport, $fileName);
     }
 
     public function index1(Request $request)
@@ -69,39 +90,106 @@ class JadwalController extends Controller
 
     public function pool($competitionId)
     {
+        // Ambil kompetisi
         $competition = Competition::findOrFail($competitionId);
-        $participants = Participant::where('competition_id', $competitionId)->get();
-        $pools = TournamentPool::with('participant')->where('competition_id', $competitionId)->get();
 
-        return view('pages.admin.jadwal.pool', compact('competition', 'participants', 'pools'));
+        // Ambil semua peserta untuk hitung total
+        $participants = Participant::where('competition_id', $competitionId)->get();
+        $participant_count = $participants->count();
+
+        // Ambil semua pool beserta relasi participant
+        $allPools = TournamentPool::with('participant')
+            ->where('competition_id', $competitionId)
+            ->orderBy('pool')
+            ->orderBy('seed_order')
+            ->get()
+            ->groupBy('pool');
+
+        // Pagination manual per grup pool
+        $perPage = 3; // misalnya 3 pool per halaman
+        $currentPage = request()->get('page', 1);
+        $pagedPools = $allPools->slice(($currentPage - 1) * $perPage, $perPage);
+
+        $poolsPaginated = new LengthAwarePaginator(
+            $pagedPools,
+            $allPools->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('pages.admin.jadwal.pool', compact('competition', 'participants', 'poolsPaginated', 'participant_count'));
     }
 
+    // View schedules for a specific competition with filters
     public function view(Request $request, $competitionId)
     {
-        // Pastikan kompetisi ditemukan
+        // 🏆 Pastikan kompetisi ditemukan
         $competition = Competition::findOrFail($competitionId);
 
-        // Query dasar jadwal untuk kompetisi ini
+        // 🔍 Query dasar jadwal dengan relasi
         $query = Schedule::with(['competition', 'participant1', 'participant2', 'winner'])
             ->where('competition_id', $competitionId);
 
-        // 🔍 Filter berdasarkan tanggal
+        // 📅 Filter berdasarkan tanggal
         if ($request->filled('date')) {
             $query->whereDate('match_time', $request->date);
         }
 
-        // 🔍 Filter berdasarkan ronde
+        // ⏰ Filter berdasarkan waktu (jam)
+        // if ($request->filled('time')) {
+        //     $query->whereTime('match_time', $request->time);
+        // }
+
+        // 🔁 Filter berdasarkan ronde
         if ($request->filled('round')) {
             $query->where('round', $request->round);
         }
 
-        // Ambil semua jadwal terfilter
-        $schedules = $query->orderBy('match_time', 'asc')->get();
+        // 🔍 Search berdasarkan nama peserta, NIK, atau kontingen
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('participant1', function ($sub) use ($search) {
+                    $sub->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%")
+                        ->orWhere('kontingen', 'like', "%{$search}%");
+                })->orWhereHas('participant2', function ($sub) use ($search) {
+                    $sub->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%")
+                        ->orWhere('kontingen', 'like', "%{$search}%");
+                });
+            });
+        }
 
-        // Grupkan berdasarkan ronde
+        // 🧩 Filter berdasarkan kategori
+        if ($request->filled('category')) {
+            $category = $request->category;
+            $query->where(function ($q) use ($category) {
+                $q->whereHas('participant1', function ($sub) use ($category) {
+                    $sub->where('category', $category);
+                })->orWhereHas('participant2', function ($sub) use ($category) {
+                    $sub->where('category', $category);
+                });
+            });
+        }
+
+        // 🏁 Filter status pertandingan (selesai / belum selesai)
+        if ($request->filled('status')) {
+            if ($request->status === 'selesai') {
+                $query->whereNotNull('winner_id');
+            } elseif ($request->status === 'belum') {
+                $query->whereNull('winner_id');
+            }
+        }
+
+        // 📋 Ambil semua jadwal terfilter
+        $schedules = $query->orderBy('match_time', 'asc')->paginate(20)->withQueryString();
+
+        // 🧩 Grupkan berdasarkan ronde
         $schedulesByRound = $schedules->groupBy('round')->sortKeys();
 
-        // 🧮 Statistik untuk kompetisi ini saja
+        // 📊 Statistik untuk kompetisi ini
         $totalMatches = Schedule::where('competition_id', $competitionId)->count();
         $todayMatches = Schedule::where('competition_id', $competitionId)
             ->whereDate('match_time', Carbon::today())
@@ -113,13 +201,14 @@ class JadwalController extends Controller
             ->whereNull('winner_id')
             ->count();
 
-        // Data untuk dropdown kompetisi (opsional)
+        // 📂 Daftar kompetisi lain (opsional dropdown)
         $competitions = Competition::where('status', '!=', 'selesai')->get();
 
-        // Kirim ke view lengkap dengan data filter dan statistik
+        // 📦 Kirim semua data ke view
         return view('pages.admin.jadwal.view', compact(
             'competition',
             'competitions',
+            'schedules',
             'schedulesByRound',
             'totalMatches',
             'todayMatches',
@@ -175,41 +264,46 @@ class JadwalController extends Controller
      */
     public function edit($id)
     {
-        $schedule = Schedule::findOrFail($id);
+        $schedule = Schedule::with(['participant1', 'participant2'])->findOrFail($id);
 
         return response()->json([
             'id' => $schedule->id,
             'competition_id' => $schedule->competition_id,
-            'participant1_id' => $schedule->participant1_id,
-            'participant2_id' => $schedule->participant2_id,
+            'participant1' => [
+                'id' => $schedule->participant1?->id,
+                'full_name' => $schedule->participant1?->full_name,
+            ],
+            'participant2' => [
+                'id' => $schedule->participant2?->id,
+                'full_name' => $schedule->participant2?->full_name,
+            ],
             'round' => $schedule->round,
             'arena' => $schedule->arena,
-            'match_time' => Carbon::parse($schedule->match_time)->format('Y-m-d\TH:i'),
+            'match_time' => $schedule->match_time ? $schedule->match_time->format('Y-m-d\TH:i') : '',
+            'winner_id' => $schedule->winner_id,
         ]);
     }
 
     /**
-     * Update the specified schedule.
+     * Show the form for editing the specified schedule.
      */
     public function update(Request $request, $id)
     {
         $schedule = Schedule::findOrFail($id);
 
         $validated = $request->validate([
-            'competition_id' => 'required|exists:competitions,id',
-            'participant1_id' => 'required|exists:participants,id',
-            'participant2_id' => 'required|exists:participants,id|different:participant1_id',
-            'round' => 'required|integer|min:1',
-            'arena' => 'required|string|max:10',
             'match_time' => 'required|date',
-        ], [
-            'participant2_id.different' => 'Peserta 1 dan Peserta 2 harus berbeda',
+            'winner_id' => 'nullable|exists:participants,id',
         ]);
 
-        $schedule->update($validated);
+        // Update hanya field tertentu
+        $schedule->match_time = $validated['match_time'];
+        $schedule->winner_id = $validated['winner_id'] ?? null;
+        $schedule->save();
 
-        return redirect()->route('admin.jadwal.index')
-            ->with('success', 'Jadwal pertandingan berhasil diupdate!');
+        return redirect()
+            ->route('admin.jadwal.view', ['competitionId' => $schedule->competition_id])
+            ->with('success', 'Jadwal pertandingan berhasil diperbarui.');
     }
 
     /**

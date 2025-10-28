@@ -104,7 +104,7 @@
                     class="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded-lg font-semibold">
                     Kirim Pendaftaran
                 </button>
-                <a href="{{ route('peserta.lomba.show', $competition->id) }}"
+                <a href="{{ url()->previous() }}"
                     class="ml-4 text-gray-600 hover:underline">
                     Batal
                 </a>

@@ -22,6 +22,7 @@ class Competition extends Model
         'registration_start_date',
         'registration_end_date',
         'status',
+        'visible_schedule',
         'competition_logo'
     ];
 

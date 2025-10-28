@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\CompetitionController;
 use App\Http\Controllers\Admin\TournamentPoolController;
 
 // Guest Route
-Route::get('/', [DashboardController::class, 'index']);
+Route::get('/', [DashboardController::class, 'index'])->name('welcome');
 
 // Auth Routes
 Route::get('/login', fn() => view('auth.login'))->name('login');
@@ -46,6 +46,7 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::get('/admin/lomba/edit/{id}', [CompetitionController::class, 'edit'])->name('admin.lomba.edit');
     Route::put('/admin/lomba/edit/{id}', [CompetitionController::class, 'update'])->name('admin.lomba.update');
     Route::delete('/admin/lomba/destroy/{id}', [CompetitionController::class, 'destroy'])->name('admin.lomba.destroy');
+    Route::patch('/admin/lomba/{id}/toggle-visibility', [CompetitionController::class, 'toggleVisibility'])->name('admin.lomba.toggleVisibility');
 
     // Routes untuk Admin - Peserta
     Route::get('/peserta/{participant}', [ParticipantsController::class, 'showPeserta'])->name('admin.peserta.show');
@@ -65,6 +66,10 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     // Pembuatan jadwal otomatis berdasarkan pool dan peserta
     Route::post('/admin/jadwal/{id}/generate-pools', [TournamentPoolController::class, 'generate'])->name('admin.jadwal.generate-pools');
     Route::post('/admin/jadwal/{competitionId}/generate-matches', [TournamentPoolController::class, 'generateMatches'])->name('admin.jadwal.generateMatches');
+
+    // Export jadwal pertandingan ke Excel
+    Route::get('/admin/jadwal/export-excel', [JadwalController::class, 'exportExcel'])
+        ->name('admin.jadwal.export.excel');
 
     // Routes untuk Admin - Jadwal Pertandingan (lama)
     Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'details']);

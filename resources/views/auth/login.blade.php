@@ -138,10 +138,12 @@
                             <label for="remember" class="ml-2 text-sm text-blue-100">Ingat saya</label>
                         </div> --}}
                         <div class="flex flex-col items-end text-end space-y-1">
-                            <a href="#" class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
+                            <a href="#"
+                                class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
                                 Lupa password?
                             </a>
-                            <a href="/register" class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
+                            <a href="/register"
+                                class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
                                 Belum punya akun? Register
                             </a>
                         </div>
@@ -152,6 +154,12 @@
                         class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transform transition-all duration-200 hover:scale-[1.02] shadow-lg">
                         Masuk
                     </button>
+                    
+                    <!-- Tombol Batal -->
+                    <a href="{{ route('welcome') }}"
+                        class="w-full mt-3 inline-block text-center bg-white/20 border border-white/30 text-white py-3 px-4 rounded-xl font-medium hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent transform transition-all duration-200 hover:scale-[1.02] shadow-md">
+                        Batal
+                    </a>
 
                     <!-- Divider -->
                     <div class="relative my-6">
