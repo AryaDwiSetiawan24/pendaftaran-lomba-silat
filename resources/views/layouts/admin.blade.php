@@ -8,6 +8,7 @@
     <title>Halaman Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.2.0/css/line.css">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
 </head>
 
 <body>

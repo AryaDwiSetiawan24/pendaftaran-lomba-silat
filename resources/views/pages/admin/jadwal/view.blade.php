@@ -189,16 +189,6 @@
                        focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
                     </div>
 
-                    {{-- ⏰ Waktu --}}
-                    {{-- <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                            Waktu
-                        </label>
-                        <input type="time" name="time" value="{{ request('time') }}"
-                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg 
-                       focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
-                    </div> --}}
-
                     {{-- 🏁 Status --}}
                     <div>
                         <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">

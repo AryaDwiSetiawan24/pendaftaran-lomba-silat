@@ -449,10 +449,10 @@
     </div>
 
     <!-- Tombol WhatsApp -->
-    <a href="https://wa.me/6282233445566" target="_blank"
-        class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center transition transform hover:scale-110 z-50 group"
+    <a href="https://wa.me/6285172455192" target="_blank"
+        class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg h-16 w-16 flex items-center justify-center transition transform hover:scale-110 z-50 group"
         title="Hubungi via WhatsApp">
-        <i class="uil uil-whatsapp text-3xl"></i>
+        <i class="uil uil-whatsapp text-3xl pb-1.5"></i>
         <span
             class="absolute right-16 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Butuh Bantuan?

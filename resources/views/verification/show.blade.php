@@ -82,8 +82,8 @@
                         role="alert">
                         {{ session('failed') }}</div>
                 @endif
-                <h1 class="text-2xl text-center font-bold text-white">Login</h1>
-
+                <h1 class="text-2xl text-center font-bold text-white">Verifikasi Otp</h1>
+                
                 <form action="/verify/{{ $unique_id }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')

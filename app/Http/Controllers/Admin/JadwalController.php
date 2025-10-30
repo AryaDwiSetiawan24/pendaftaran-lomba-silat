@@ -99,7 +99,7 @@ class JadwalController extends Controller
         $participant_count = $participants->count();
 
         // Ambil semua pool beserta relasi participant
-        $allPools = TournamentPool::with('participant')
+        $allPools = TournamentPool::with('participant:id,full_name,weight_class,category')
             ->where('competition_id', $competitionId)
             ->orderBy('pool')
             ->orderBy('seed_order')
@@ -136,11 +136,6 @@ class JadwalController extends Controller
         if ($request->filled('date')) {
             $query->whereDate('match_time', $request->date);
         }
-
-        // ⏰ Filter berdasarkan waktu (jam)
-        // if ($request->filled('time')) {
-        //     $query->whereTime('match_time', $request->time);
-        // }
 
         // 🔁 Filter berdasarkan ronde
         if ($request->filled('round')) {

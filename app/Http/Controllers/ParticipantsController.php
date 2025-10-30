@@ -174,16 +174,29 @@ class ParticipantsController extends Controller
         return Excel::download(new ParticipantsExport, 'daftar-peserta-' . date('Y-m-d') . '.xlsx');
     }
 
+
+
     // Dashboard peserta
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $participants = auth()->user()->participants()
             ->with('competition')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('full_name', 'LIKE', "%{$search}%")
+                        ->orWhere('nik', 'LIKE', "%{$search}%")
+                        ->orWhere('phone_number', 'LIKE', "%{$search}%")
+                        ->orWhere('kontingen', 'LIKE', "%{$search}%");
+                });
+            })
             ->latest()
             ->paginate(20);
 
         return view('pages.peserta.lomba.pendaftaran-peserta', compact('participants'));
     }
+
 
     public function showParticipant($id)
     {

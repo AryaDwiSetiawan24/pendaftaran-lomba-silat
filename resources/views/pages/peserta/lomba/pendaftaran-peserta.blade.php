@@ -1,8 +1,38 @@
 <x-peserta-layout>
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 class="text-2xl font-bold text-gray-800">Pendaftaran Saya</h2>
-        <a href="{{ route('peserta.dashboard') }}" class="text-gray-600 hover:text-red-800 text-sm sm:text-base">
-            <i class="uil uil-angle-left"></i> Kembali ke Dashboard
+    <!-- Header dengan search -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Pendaftaran Saya</h2>
+            <p class="text-sm text-gray-500">Daftar peserta yang telah Anda daftarkan dalam lomba ini.</p>
+        </div>
+
+        <!-- Form Pencarian -->
+        <form action="{{ url()->current() }}" method="GET" class="w-full sm:w-auto">
+            <div class="flex items-center gap-2">
+                <input type="text" name="search"
+                    class="w-full sm:w-64 pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                    placeholder="Cari nama, NIK, kontingen..." value="{{ request('search') }}">
+
+                <button type="submit"
+                    class="px-4 py-2 bg-red-800 text-white rounded-lg hover:bg-red-700 font-semibold text-sm transition">
+                    <i class="uil uil-search"></i>
+                    <span class="hidden sm:inline ml-1">Cari</span>
+                </button>
+
+                @if (request('search'))
+                    <a href="{{ url()->current() }}"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-semibold text-sm transition">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    <div class="mb-4">
+        <a href="{{ route('peserta.dashboard') }}"
+            class="inline-flex items-center text-gray-600 hover:text-red-800 text-sm font-medium transition">
+            <i class="uil uil-angle-left mr-1"></i> Kembali ke Dashboard
         </a>
     </div>
 
@@ -16,92 +46,55 @@
             </a>
         </div>
     @else
-        <!-- Wrapper responsif -->
         <div class="bg-white rounded-xl shadow overflow-hidden">
-            <!-- Hanya tampil di layar besar -->
+            <!-- Desktop table -->
             <div class="hidden sm:block overflow-hidden rounded-lg border border-gray-200 shadow-sm">
                 <table class="w-full text-sm">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                         <tr>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                No</th>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Nama Peserta</th>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Kontingen</th>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Lomba</th>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Kategori</th>
-                            <th
-                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Status</th>
-                            <th
-                                class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Aksi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Nama Peserta
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kontingen</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Lomba</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($participants as $p)
+                        @foreach ($participants as $index => $p)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-medium text-gray-900">{{ $p->id }}</span>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                    {{ $participants->firstItem() + $index }}
                                 </td>
+                                <td class="px-6 py-4 font-semibold text-gray-900">
+                                    {{ $p->full_name }}
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">{{ $p->kontingen ?? '-' }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ $p->competition->name }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ $p->category }}</td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-gray-900">{{ $p->full_name }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm text-gray-600">{{ $p->kontingen ?? '-' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-700">{{ $p->competition->name }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm text-gray-700">{{ $p->category }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $statusConfig = [
-                                            'pending' => [
-                                                'bg' => 'bg-yellow-50',
-                                                'text' => 'text-yellow-700',
-                                                'border' => 'border-yellow-200',
-                                            ],
-                                            'approved' => [
-                                                'bg' => 'bg-green-50',
-                                                'text' => 'text-green-700',
-                                                'border' => 'border-green-200',
-                                            ],
-                                            'rejected' => [
-                                                'bg' => 'bg-red-50',
-                                                'text' => 'text-red-700',
-                                                'border' => 'border-red-200',
-                                            ],
-                                        ];
-                                        $config = $statusConfig[$p->validation_status] ?? [
-                                            'bg' => 'bg-gray-50',
-                                            'text' => 'text-gray-700',
-                                            'border' => 'border-gray-200',
+                                            'pending' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                            'approved' => 'bg-green-50 text-green-700 border-green-200',
+                                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
                                         ];
                                     @endphp
                                     <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $config['bg'] }} {{ $config['text'] }} {{ $config['border'] }}">
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig[$p->validation_status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
                                         {{ ucfirst($p->validation_status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('peserta.pendaftaran.show', $p->id) }}"
-                                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-150 font-medium text-xs shadow-sm">
+                                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs font-medium shadow-sm">
                                             Detail
                                         </a>
                                         <a href="{{ route('peserta.pendaftaran.edit', $p->id) }}"
-                                            class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors duration-150 font-medium text-xs shadow-sm">
+                                            class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-xs font-medium shadow-sm">
                                             Edit
                                         </a>
                                     </div>
@@ -112,7 +105,7 @@
                 </table>
             </div>
 
-            <!-- Tampilan mobile -->
+            <!-- Mobile -->
             <div class="sm:hidden divide-y divide-gray-200">
                 @foreach ($participants as $p)
                     <div class="p-4">
@@ -147,7 +140,7 @@
 
             <!-- Pagination -->
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {{ $participants->links() }}
+                {{ $participants->appends(['search' => request('search')])->links() }}
             </div>
         </div>
     @endif
