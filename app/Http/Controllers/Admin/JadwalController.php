@@ -88,6 +88,7 @@ class JadwalController extends Controller
         ));
     }
 
+    // View pools and their participants for a specific competition
     public function pool($competitionId)
     {
         // Ambil kompetisi
