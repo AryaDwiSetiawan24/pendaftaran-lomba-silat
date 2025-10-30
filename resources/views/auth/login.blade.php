@@ -138,10 +138,10 @@
                             <label for="remember" class="ml-2 text-sm text-blue-100">Ingat saya</label>
                         </div> --}}
                         <div class="flex flex-col items-end text-end space-y-1">
-                            <a href="#"
+                            {{-- <a href="#"
                                 class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
                                 Lupa password?
-                            </a>
+                            </a> --}}
                             <a href="/register"
                                 class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
                                 Belum punya akun? Register
