@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Competition;
 use App\Models\Participant;
 use Illuminate\Support\Carbon;
+use App\Models\Schedule;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $competitions = Competition::orderBy('competition_date', 'asc')->get();
+        $competitions = Competition::where('status', 'dibuka')
+            ->orderBy('competition_date', 'asc')
+            ->get();
         return view('layouts.guest', compact('competitions'));
     }
 
@@ -46,17 +49,62 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Lomba yang sedang dibuka
-        $competitions = Competition::where('status', 'dibuka')->get();
+        // 1️⃣ Ambil data partisipasi + kompetisi terkait
+        $myCompetitionsQuery = Participant::with(['competition:id,name,competition_date,location'])
+            ->where('user_id', $user->id);
 
-        // Lomba yang diikuti oleh user saat ini
-        $myCompetitions = \App\Models\Participant::with('competition')
-            ->where('user_id', $user->id)
-            ->get();
+        // 2️⃣ Hitung statistik peserta
+        $totalParticipants = Participant::count();
+        $totalCompetitions = (clone $myCompetitionsQuery)
+            ->distinct('competition_id')
+            ->count('competition_id');
+        $pendingCount = Participant::where('validation_status', 'pending')->count();
+        $approvedCount = Participant::where('validation_status', 'approved')->count();
+        $rejectedCount = Participant::where('validation_status', 'rejected')->count();
 
-        // Hitung jumlah lomba unik yang diikuti user ini
-        $registeredCompetitions = $myCompetitions->pluck('competition_id')->unique()->count();
+        // 3️⃣ Ambil daftar lomba yang masih dibuka
+        $competitions = Competition::where('status', 'dibuka')
+            ->orderBy('registration_start_date', 'desc')
+            ->paginate(5, ['*'], 'lomba_page');
 
-        return view('pages.peserta.dashboard', compact('competitions', 'myCompetitions', 'registeredCompetitions'));
+        // 4️⃣ Ambil jadwal pertandingan user (UPDATED)
+        // Cari ID participant user yang sudah approved
+        // $participantIds = Participant::where('user_id', $user->id)
+        //     ->where('validation_status', 'approved')
+        //     ->pluck('id');
+
+        // Ambil jadwal dimana user adalah participant1 ATAU participant2
+        // $schedules = Schedule::with([
+        //     'competition:id,name,competition_date,competition_logo,visible_schedule',
+        //     'participant1:id,full_name,weight_class,category,nik,kontingen',
+        //     'participant2:id,full_name,weight_class,category,nik,kontingen',
+        //     'winner:id,full_name'
+        // ])
+        //     ->where(function ($q) use ($participantIds) {
+        //         $q->whereIn('participant1_id', $participantIds)
+        //             ->orWhereIn('participant2_id', $participantIds);
+        //     })
+        //     ->whereHas('competition', function ($q) {
+        //         $q->where('visible_schedule', true)
+        //             ->whereNotNull('competition_date')
+        //             ->where('status', 'dibuka');
+        //     })
+        //     ->orderBy('match_time', 'asc')
+        //     ->paginate(5, ['*'], 'schedule_page');
+
+        // 5️⃣ Kumpulkan statistik
+        // $stats = [
+        //     'total_competitions' => $statistics->total_competitions ?? 0,
+        // ];
+
+        // 6️⃣ Kirim ke view
+        return view('pages.peserta.dashboard', compact(
+            'competitions',
+            'totalParticipants',
+            'pendingCount',
+            'approvedCount',
+            'rejectedCount',
+            'totalCompetitions'
+        ));
     }
 }

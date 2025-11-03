@@ -8,6 +8,7 @@
     <title>Halaman Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.2.0/css/line.css">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
 </head>
 
 <body>
@@ -21,12 +22,14 @@
             <main class="flex-1">
                 <!-- Content area -->
                 <div class="p-4 lg:ml-60 md:ml-60 sm:p-6 md:p-8">
+                    <!-- Alert -->
+                    <x-alert />
+
                     {{ $slot }}
                 </div>
             </main>
         </div>
     </div>
-
 </body>
 
 </html>

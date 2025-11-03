@@ -41,61 +41,58 @@ class AuthController extends Controller
         return redirect('/peserta')->with('success', 'Register berhasil! Selamat datang ' . $user->name . '.');
     }
 
+    // Redirect ke Google
     public function googleRedirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
-    // public function googleCallback(){
-    //     $googleUser = Socialite::driver('google')->user();
-    //     dd($googleUser);
-    // }
-
+    // Callback Google
     public function googleCallback()
     {
         try {
-            // 🔹 Ambil data user dari Google setelah proses login/izin selesai.
-            // Gunakan ->stateless() jika kamu masih testing di localhost tanpa session yang stabil.
+            // Ambil data user dari Google
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            // 🔹 Cek apakah user dengan google_id ini sudah pernah terdaftar di database.
-            $user = User::where('google_id', $googleUser->getId())->first();
+            // Cari user berdasarkan google_id atau email
+            $user = User::where('google_id', $googleUser->getId())
+                ->orWhere('email', $googleUser->getEmail())
+                ->first();
 
-            if ($user) {
-                // ✅ Jika sudah terdaftar, langsung login.
-                Auth::login($user);
-            } else {
-                // ⚙️ Jika belum terdaftar, buat akun baru menggunakan data dari Google.
-                $newUser = User::create([
-                    'name'       => $googleUser->getName(),
-                    'email'      => $googleUser->getEmail(),
-                    'google_id'  => $googleUser->getId(),
-                    'avatar'     => $googleUser->getAvatar(),
-                    'role'       => 'peserta', // default role
-                    'password'   => Hash::make(Str::random(24)), // password acak karena login via Google
+            if (!$user) {
+                // Buat user baru jika belum ada
+                $user = User::create([
+                    'name'      => $googleUser->getName(),
+                    'email'     => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar'    => $googleUser->getAvatar(),
+                    'role'      => 'peserta', // default role
+                    'status'      => 'active', // status aktif tanpa otp
+                    'password'  => Hash::make(Str::random(24)), // random password
                 ]);
-
-                // 🔹 Setelah akun dibuat, langsung login-kan user baru ini.
-                Auth::login($newUser);
             }
 
-            // 🔹 Redirect ke halaman utama/dashboard setelah berhasil login.
-            return redirect()->route('home')->with('success', 'Login dengan Google berhasil!');
+            // Login user
+            Auth::login($user);
+
+            // Redirect berdasarkan role
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard')->with('success', 'Login berhasil sebagai Admin!');
+            } else {
+                return redirect()->route('peserta.dashboard')->with('success', 'Login berhasil!');
+            }
         } catch (\Exception $e) {
-            // ⚠️ Jika terjadi error (misalnya user membatalkan login atau SSL bermasalah)
-            // maka arahkan kembali ke halaman login dengan pesan error.
-            return redirect()
-                ->route('login')
-                ->with('error', 'Gagal melakukan autentikasi dengan Google. Silakan coba lagi.');
-            // Jika perlu debugging, aktifkan baris di bawah ini sementara:
+            // Debug sementara: tampilkan error
             // dd($e->getMessage());
+
+            // Produksi: redirect ke login dengan pesan error
+            return redirect()->route('login')->with('error', 'Gagal login dengan Google.');
         }
     }
-
 
     public function logout()
     {
         Auth::logout();
-        return redirect('/login')->with('success', 'Logout berhasil!');
+        return redirect('/')->with('success', 'Logout berhasil!');
     }
 }

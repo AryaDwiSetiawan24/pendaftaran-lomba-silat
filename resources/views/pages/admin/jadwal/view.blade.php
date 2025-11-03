@@ -40,29 +40,18 @@
                     <a href="{{ route('admin.jadwal.pool', $competition->id) }}"
                         class="px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-semibold text-sm inline-flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         <i class="uil uil-sitemap mr-2"></i>
-                        Kelola Pool
+                        Kelola Grup
                     </a>
 
-                    <a href="{{ route('admin.jadwal.index') }}"
-                        class="px-5 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-semibold text-sm inline-flex items-center">
-                        <i class="uil uil-arrow-left mr-2"></i>
-                        Kembali
+                    <a href="{{ route('admin.jadwal.export.excel', $competition->id) }}"
+                        class="px-5 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-semibold text-sm inline-flex items-center hover:-translate-y-0.5">
+                        <i class="uil uil-download-alt mr-2"></i>
+                        Export Jadwal
                     </a>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Flash Message -->
-    @if (session('success'))
-        <div
-            class="mb-6 bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm animate-fade-in">
-            <div class="flex items-center">
-                <i class="uil uil-check-circle text-2xl mr-3"></i>
-                <span class="font-semibold">{{ session('success') }}</span>
-            </div>
-        </div>
-    @endif
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -124,33 +113,64 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-2xl shadow-md mb-8">
-        <div class="border-b border-gray-200 px-6 py-4">
-            <h3 class="font-bold text-gray-900 flex items-center">
-                <i class="uil uil-filter text-red-900 mr-2"></i>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+        <div class="border-b border-gray-200 px-4 sm:px-6 py-4">
+            <h3 class="font-semibold text-gray-800 flex items-center">
+                <i class="uil uil-filter text-red-700 mr-2"></i>
                 Filter Pertandingan
             </h3>
         </div>
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <form method="GET" action="{{ route('admin.jadwal.view', $competition->id) }}">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <!-- Date Filter -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="uil uil-calendar-alt text-red-900"></i> Tanggal
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+
+                    {{-- 🔍 Pencarian --}}
+                    <div class="sm:col-span-2 lg:col-span-3 xl:col-span-2">
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Pencarian
                         </label>
-                        <input type="date" name="date" value="{{ request('date') }}"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-900 focus:border-transparent transition">
+                        <div class="relative">
+                            <i class="uil uil-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Nama / NIK / Kontingen"
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg 
+                           focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm" />
+                        </div>
                     </div>
 
-                    <!-- Round Filter -->
+                    {{-- 🧩 Kategori --}}
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="uil uil-layer-group text-red-900"></i> Ronde
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Kategori
+                        </label>
+                        <select name="category"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white
+                       focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
+                            <option value="">Semua</option>
+                            <option value="USIA DINI (SD)"
+                                {{ request('category') == 'USIA DINI (SD)' ? 'selected' : '' }}>
+                                USIA DINI (SD)
+                            </option>
+                            <option value="PRA REMAJA (SMP)"
+                                {{ request('category') == 'PRA REMAJA (SMP)' ? 'selected' : '' }}>
+                                PRA REMAJA (SMP)
+                            </option>
+                            <option value="REMAJA (SMA/K/MA)"
+                                {{ request('category') == 'REMAJA (SMA/K/MA)' ? 'selected' : '' }}>
+                                REMAJA (SMA/K/MA)
+                            </option>
+                        </select>
+                    </div>
+
+                    {{-- 🔁 Ronde --}}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Ronde
                         </label>
                         <select name="round"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-900 focus:border-transparent bg-white transition">
-                            <option value="">Semua Ronde</option>
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white
+                       focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
+                            <option value="">Semua</option>
                             <option value="1" {{ request('round') == '1' ? 'selected' : '' }}>Ronde 1</option>
                             <option value="2" {{ request('round') == '2' ? 'selected' : '' }}>Ronde 2</option>
                             <option value="3" {{ request('round') == '3' ? 'selected' : '' }}>Ronde 3</option>
@@ -159,25 +179,56 @@
                         </select>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="flex items-end gap-3 md:col-span-3">
-                        <button type="submit"
-                            class="flex-1 px-6 py-2.5 bg-gradient-to-r from-red-900 to-red-800 text-white rounded-xl hover:from-red-800 hover:to-red-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <i class="uil uil-search mr-2"></i>
-                            Terapkan Filter
-                        </button>
-                        <a href="{{ route('admin.jadwal.view', $competition->id) }}"
-                            class="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold">
-                            <i class="uil uil-redo"></i>
-                        </a>
+                    {{-- 📅 Tanggal --}}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Tanggal
+                        </label>
+                        <input type="date" name="date" value="{{ request('date') }}"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg 
+                       focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
                     </div>
+
+                    {{-- 🏁 Status --}}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                            Status
+                        </label>
+                        <select name="status"
+                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white
+                       focus:ring-2 focus:ring-red-500 focus:border-transparent transition text-sm">
+                            <option value="">Semua</option>
+                            <option value="belum" {{ request('status') == 'belum' ? 'selected' : '' }}>Belum Selesai
+                            </option>
+                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- 🔘 Tombol Aksi --}}
+                <div
+                    class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-6 pt-6 border-t border-gray-100">
+                    <button type="submit"
+                        class="inline-flex items-center justify-center px-6 py-2.5 bg-red-700 hover:bg-red-800 text-white rounded-lg
+                   font-semibold shadow-sm transition-all duration-200">
+                        <i class="uil uil-filter mr-2"></i>
+                        Terapkan Filter
+                    </button>
+
+                    <a href="{{ route('admin.jadwal.view', $competition->id) }}"
+                        class="inline-flex items-center justify-center px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg
+                   transition-all duration-200 font-semibold">
+                        <i class="uil uil-redo mr-2"></i>
+                        Reset Filter
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Jadwal per Ronde -->
-    @foreach ($schedulesByRound ?? [] as $round => $matches)
+    @foreach ($schedules->groupBy('round') as $round => $matches)
         <div class="bg-white rounded-2xl shadow-md mb-8 overflow-hidden">
             <!-- Round Header -->
             <div class="bg-gradient-to-r from-red-900 via-red-800 to-orange-700 p-6">
@@ -210,15 +261,7 @@
             <!-- Matches List -->
             <div class="p-6">
                 <div class="space-y-4">
-                    @php
-                        $matchesCollection = collect($matches);
-                        $perPage = 10;
-                        $currentPage = request()->get('page_round_' . $round, 1);
-                        $paginatedMatches = $matchesCollection->forPage($currentPage, $perPage);
-                        $totalPages = ceil($matchesCollection->count() / $perPage);
-                    @endphp
-
-                    @foreach ($paginatedMatches as $match)
+                    @foreach ($matches as $match)
                         <div
                             class="border-2 border-gray-200 rounded-xl hover:border-red-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
                             <div class="p-6">
@@ -227,7 +270,7 @@
                                     <span
                                         class="px-4 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold rounded-full shadow-md">
                                         <i class="uil uil-location-point mr-1"></i>
-                                        Arena {{ $match->arena }}
+                                        {{ $match->participant1->category ?? '-' }}
                                     </span>
                                     <span
                                         class="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-full">
@@ -356,59 +399,9 @@
                 </div>
 
                 <!-- Pagination -->
-                @if ($totalPages > 1)
-                    <div
-                        class="mt-6 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-6 gap-4">
-                        <div class="text-sm text-gray-600">
-                            Menampilkan <span class="font-semibold">{{ ($currentPage - 1) * $perPage + 1 }}</span>
-                            sampai <span
-                                class="font-semibold">{{ min($currentPage * $perPage, $matchesCollection->count()) }}</span>
-                            dari <span class="font-semibold">{{ $matchesCollection->count() }}</span> pertandingan
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            @if ($currentPage > 1)
-                                <a href="{{ request()->fullUrlWithQuery(['page_round_' . $round => $currentPage - 1]) }}"
-                                    class="px-3 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold text-sm">
-                                    <i class="uil uil-angle-left"></i>
-                                </a>
-                            @else
-                                <span
-                                    class="px-3 py-2 border-2 border-gray-200 text-gray-400 rounded-lg cursor-not-allowed text-sm">
-                                    <i class="uil uil-angle-left"></i>
-                                </span>
-                            @endif
-
-                            <div class="flex gap-1">
-                                @for ($i = 1; $i <= $totalPages; $i++)
-                                    @if ($i == $currentPage)
-                                        <span
-                                            class="px-3 py-2 bg-red-900 text-white rounded-lg font-bold text-sm min-w-10 text-center">{{ $i }}</span>
-                                    @elseif($i == 1 || $i == $totalPages || abs($i - $currentPage) <= 1)
-                                        <a href="{{ request()->fullUrlWithQuery(['page_round_' . $round => $i]) }}"
-                                            class="px-3 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold text-sm min-w-10 text-center">
-                                            {{ $i }}
-                                        </a>
-                                    @elseif(abs($i - $currentPage) == 2)
-                                        <span class="px-2 py-2 text-gray-400 text-sm">...</span>
-                                    @endif
-                                @endfor
-                            </div>
-
-                            @if ($currentPage < $totalPages)
-                                <a href="{{ request()->fullUrlWithQuery(['page_round_' . $round => $currentPage + 1]) }}"
-                                    class="px-3 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold text-sm">
-                                    <i class="uil uil-angle-right"></i>
-                                </a>
-                            @else
-                                <span
-                                    class="px-3 py-2 border-2 border-gray-200 text-gray-400 rounded-lg cursor-not-allowed text-sm">
-                                    <i class="uil uil-angle-right"></i>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                @endif
+                <div class="mt-8">
+                    {{ $schedules->links('pagination::tailwind') }}
+                </div>
             </div>
         </div>
     @endforeach
@@ -436,20 +429,112 @@
         </div>
     @endif
 
-    <script>
-        // Auto-hide alerts
-        setTimeout(() => {
-            const alerts = ['successAlert', 'errorAlert'];
-            alerts.forEach(id => {
-                const alert = document.getElementById(id);
-                if (alert) {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }
-            });
-        }, 5000);
+    <!-- Edit Schedule Modal -->
+    <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full">
+            <div
+                class="bg-gradient-to-r from-red-900 to-orange-800 p-5 rounded-t-xl flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="uil uil-calendar-alt text-yellow-400 text-2xl mr-2"></i>
+                    Edit Jadwal Pertandingan
+                </h3>
+                <button onclick="closeScheduleModal()" class="text-white hover:text-gray-200">
+                    <i class="uil uil-times text-2xl"></i>
+                </button>
+            </div>
 
+            <form id="scheduleForm" method="POST" class="p-6">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="PUT">
+
+                <div class="space-y-4">
+                    <!-- Peserta -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <p class="text-sm font-semibold text-gray-700 mb-1">Peserta 1</p>
+                        <p id="participant1_name" class="font-bold text-gray-900"></p>
+
+                        <p class="text-sm font-semibold text-gray-700 mt-3 mb-1">Peserta 2</p>
+                        <p id="participant2_name" class="font-bold text-gray-900"></p>
+                    </div>
+
+                    <!-- Waktu -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Waktu Pertandingan
+                        </label>
+                        <input type="datetime-local" name="match_time" id="match_time"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent"
+                            required>
+                    </div>
+
+                    <!-- Winner -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pemenang</label>
+                        <select name="winner_id" id="winner_id"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent bg-white">
+                            <option value="">Belum ada pemenang</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Kamu bisa mengosongkan pemenang untuk membatalkan status
+                            pertandingan selesai.</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeScheduleModal()"
+                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-3 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-semibold">
+                        <i class="uil uil-save mr-2"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div id="winnerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 rounded-t-xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-white flex items-center">
+                        <i class="uil uil-trophy text-yellow-300 text-3xl mr-3"></i>
+                        Set Pemenang
+                    </h3>
+                    <button onclick="closeWinnerModal()" class="text-white hover:text-gray-200 transition">
+                        <i class="uil uil-times text-3xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form id="winnerForm" method="POST" class="p-6">
+                @csrf
+                @method('PATCH')
+
+                <p class="text-gray-600 mb-4">Pilih pemenang dari pertandingan ini:</p>
+
+                <div id="winnerOptions" class="space-y-3">
+                    <!-- Options will be loaded dynamically -->
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="closeWinnerModal()"
+                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                        <i class="uil uil-check mr-2"></i>
+                        Simpan Pemenang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
         // Schedule Modal functions
         function openAddModal() {
             document.getElementById('scheduleModal').classList.remove('hidden');
@@ -466,21 +551,32 @@
         }
 
         function editSchedule(id) {
-            // Fetch schedule data and populate form
             fetch(`/admin/jadwal/${id}/edit`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('modalTitle').textContent = 'Edit Jadwal Pertandingan';
                     document.getElementById('formMethod').value = 'PUT';
                     document.getElementById('scheduleForm').action = `/admin/jadwal/${id}`;
-                    document.getElementById('scheduleId').value = data.id;
-                    document.getElementById('competition_id').value = data.competition_id;
-                    loadParticipants(data.competition_id, data.participant1_id, data.participant2_id);
-                    document.getElementById('round').value = data.round;
-                    document.getElementById('arena').value = data.arena;
                     document.getElementById('match_time').value = data.match_time;
 
-                    openAddModal();
+                    // Tampilkan nama peserta
+                    document.getElementById('participant1_name').textContent = data.participant1?.full_name || '-';
+                    document.getElementById('participant2_name').textContent = data.participant2?.full_name || '-';
+
+                    // Isi opsi pemenang
+                    const winnerSelect = document.getElementById('winner_id');
+                    winnerSelect.innerHTML = `
+                <option value="">Belum ada pemenang</option>
+                <option value="${data.participant1?.id}" ${data.winner_id === data.participant1?.id ? 'selected' : ''}>
+                    ${data.participant1?.full_name || '-'}
+                </option>
+                <option value="${data.participant2?.id}" ${data.winner_id === data.participant2?.id ? 'selected' : ''}>
+                    ${data.participant2?.full_name || '-'}
+                </option>
+            `;
+
+                    // Buka modal
+                    document.getElementById('scheduleModal').classList.remove('hidden');
+                    document.getElementById('scheduleModal').classList.add('flex');
                 });
         }
 

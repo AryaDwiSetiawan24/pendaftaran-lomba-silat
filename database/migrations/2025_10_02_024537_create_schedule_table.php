@@ -33,17 +33,17 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('participants')
                 ->onDelete('set null');
-
-            // Relasi ke pool asal pertandingan
-            $table->foreignId('pool_id')
+                
+                // Relasi ke pool asal pertandingan
+                $table->foreignId('pool_id')
                 ->nullable()
                 ->constrained('tournament_pools')
                 ->onDelete('set null');
-
-            // Match details
-            $table->integer('round'); // 1, 2, 3, 4 (semi), 5 (final)
-            $table->string('arena'); // sementara hanya satu arena
-            $table->dateTime('match_time'); // nantinya diisi manual
+                
+                // Match details
+                $table->integer('round'); // 1, 2, 3, 4 (semi), 5 (final)
+                $table->string('arena'); // sementara hanya satu arena
+                $table->dateTime('match_time'); // nantinya diisi manual
 
             $table->timestamps();
 

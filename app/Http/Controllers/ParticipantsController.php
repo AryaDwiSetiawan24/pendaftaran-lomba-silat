@@ -4,18 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Competition;
 use App\Models\Participant;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ParticipantsExport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use App\Exports\ParticipantsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
 class ParticipantsController extends Controller
 {
     // Metode Admin
-    /**
-     * Menampilkan halaman daftar peserta dengan filter dan statistik.
-     */
+    // Menampilkan halaman daftar peserta dengan filter dan statistik.
     public function peserta(Request $request)
     {
         // Ambil data untuk filter dropdown
@@ -35,7 +34,8 @@ class ParticipantsController extends Controller
             $q->where(function ($subq) use ($search) {
                 $subq->where('full_name', 'like', "%{$search}%")
                     ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%");
+                    ->orWhere('phone_number', 'like', "%{$search}%")
+                    ->orWhere('kontingen', 'like', "%{$search}%");
             });
         });
 
@@ -60,7 +60,7 @@ class ParticipantsController extends Controller
         });
 
         // Ambil hasil dengan paginasi
-        $peserta = $query->latest()->paginate(15)->withQueryString(); // withQueryString agar filter tetap ada saat ganti halaman
+        $peserta = $query->latest()->paginate(15)->withQueryString();
 
         return view('pages.admin.peserta', compact(
             'peserta',
@@ -120,9 +120,9 @@ class ParticipantsController extends Controller
 
     public function editPeserta(Participant $participant)
     {
-        // $participant = Participant::with('competition')->findOrFail($id);
         $categories = [
-            'USIA DINI (SD)',
+            'USIA DINI 1 (SD)',
+            'USIA DINI 2 (SD)',
             'PRA REMAJA (SMP)',
             'REMAJA (SMA/K/MA)',
             'DEWASA (MAHASISWA/UMUM)',
@@ -174,16 +174,29 @@ class ParticipantsController extends Controller
         return Excel::download(new ParticipantsExport, 'daftar-peserta-' . date('Y-m-d') . '.xlsx');
     }
 
+
+
     // Dashboard peserta
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $participants = auth()->user()->participants()
             ->with('competition')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('full_name', 'LIKE', "%{$search}%")
+                        ->orWhere('nik', 'LIKE', "%{$search}%")
+                        ->orWhere('phone_number', 'LIKE', "%{$search}%")
+                        ->orWhere('kontingen', 'LIKE', "%{$search}%");
+                });
+            })
             ->latest()
-            ->get();
+            ->paginate(20);
 
         return view('pages.peserta.lomba.pendaftaran-peserta', compact('participants'));
     }
+
 
     public function showParticipant($id)
     {
@@ -194,11 +207,42 @@ class ParticipantsController extends Controller
         return view('pages.peserta.lomba.pendaftaran-show', compact('participant'));
     }
 
-    // Detail lomba
-    public function show($competition_id)
+    // Detail lomba dan peserta saya
+    public function show(Request $request, $competition_id)
     {
-        $competition = Competition::with('participants')->findOrFail($competition_id);
-        return view('pages.peserta.lomba.show', compact('competition'));
+        // Query untuk mengambil data lomba dan statistik peserta
+        $competition = Competition::withCount('participants')->findOrFail($competition_id);
+        $categoryCounts = Participant::where('competition_id', $competition_id)
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->pluck('total', 'category');
+
+        // Ambil input pencarian
+        $search = $request->input('search');
+
+        // Mulai query untuk peserta milik user
+        $myParticipantsQuery = Participant::where('competition_id', $competition_id)
+            ->where('user_id', auth()->id());
+
+        // Jika ada input pencarian, tambahkan kondisi WHERE
+        if ($search) {
+            $myParticipantsQuery->where(function ($query) use ($search) {
+                $query->where('full_name', 'LIKE', "%{$search}%")
+                    ->orWhere('nik', 'LIKE', "%{$search}%")
+                    ->orWhere('phone_number', 'LIKE', "%{$search}%")
+                    ->orWhere('kontingen', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Terapkan urutan dan paginasi, lalu tambahkan query string ke link paginasi
+        $myParticipants = $myParticipantsQuery->latest()->paginate(10, ['*'], 'peserta_page')
+            ->appends($request->query());
+
+        return view('pages.peserta.lomba.show', compact(
+            'competition',
+            'myParticipants',
+            'categoryCounts'
+        ));
     }
 
     // Form pendaftaran
@@ -212,7 +256,7 @@ class ParticipantsController extends Controller
     public function store(Request $request)
     {
         // 1. Validasi Input
-        $validatedData = $request->validate([
+        $request->validate([
             'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
@@ -220,17 +264,18 @@ class ParticipantsController extends Controller
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:L,P',
             'nik' => [
-                'required',
-                'digits:16',
-                // NIK harus unik untuk setiap kompetisi
-                Rule::unique('participants')->where(function ($query) use ($request) {
-                    return $query->where('competition_id', $request->competition_id);
-                }),
+            'required',
+            'digits:16',
+            // NIK harus unik untuk setiap kompetisi
+            Rule::unique('participants')->where(function ($query) use ($request) {
+                return $query->where('competition_id', $request->competition_id);
+            }),
             ],
             'category' => 'required|string|max:255',
-            'body_weight' => 'required|numeric|min:20|max:120', // Input baru
+            'body_weight' => 'required|numeric|min:20|max:120',
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'note' => 'nullable|string',
         ], [
             // Pesan error kustom:
             'nik.unique' => 'NIK ini sudah terdaftar pada kompetisi ini.',
@@ -274,6 +319,7 @@ class ParticipantsController extends Controller
                 'weight_class' => $weightClass,
                 'phone_number' => $request->phone_number,
                 'bukti_bayar' => $path,
+                'note' => $request->note,
             ]);
 
             return redirect()->route('peserta.pendaftaran.index')
@@ -291,7 +337,18 @@ class ParticipantsController extends Controller
     {
         $class = null;
         switch ($category) {
-            case 'USIA DINI (SD)':
+            case 'USIA DINI 1 (SD)':
+                if ($weight >= 26 && $weight <= 28) $class = 'A';
+                elseif ($weight > 28 && $weight <= 30) $class = 'B';
+                elseif ($weight > 30 && $weight <= 32) $class = 'C';
+                elseif ($weight > 32 && $weight <= 34) $class = 'D';
+                elseif ($weight > 34 && $weight <= 36) $class = 'E';
+                elseif ($weight > 36 && $weight <= 38) $class = 'F';
+                elseif ($weight > 38 && $weight <= 40) $class = 'G';
+                elseif ($weight > 40 && $weight <= 42) $class = 'H';
+                elseif ($weight > 42 && $weight <= 44) $class = 'I';
+                break;
+            case 'USIA DINI 2 (SD)':
                 if ($weight >= 26 && $weight <= 28) $class = 'A';
                 elseif ($weight > 28 && $weight <= 30) $class = 'B';
                 elseif ($weight > 30 && $weight <= 32) $class = 'C';
@@ -368,8 +425,8 @@ class ParticipantsController extends Controller
         }
 
         // 1. Validasi Input (diubah ke 'body_weight')
-        $validatedData = $request->validate([
-            'competition_id' => 'required|exists:competitions,id',
+        $request->validate([
+            // 'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
             'place_of_birth' => 'required|string|max:255',
@@ -386,6 +443,7 @@ class ParticipantsController extends Controller
             'body_weight' => 'required|numeric|min:20|max:120', // <-- DIUBAH
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'note' => 'nullable|string',
         ], [
             'nik.unique' => 'NIK ini sudah terdaftar pada lomba yang sama.',
         ]);
@@ -415,7 +473,7 @@ class ParticipantsController extends Controller
 
         // 5. Update Data ke Database
         $participant->update([
-            'competition_id' => $request->competition_id,
+            // 'competition_id' => $request->competition_id,
             'kontingen' => $request->kontingen,
             'full_name' => $request->full_name,
             'place_of_birth' => $request->place_of_birth,
@@ -423,10 +481,11 @@ class ParticipantsController extends Controller
             'gender' => $request->gender,
             'nik' => $request->nik,
             'category' => $request->category,
-            'body_weight' => $request->body_weight,   // <-- DITAMBAHKAN
-            'weight_class' => $weightClass,          // <-- DIUBAH
+            'body_weight' => $request->body_weight,
+            'weight_class' => $weightClass,
             'phone_number' => $request->phone_number,
             'bukti_bayar' => $path,
+            'note' => $request->note,
         ]);
 
         return redirect()->route('peserta.pendaftaran.index')->with('success', 'Data peserta berhasil diperbarui.');

@@ -187,6 +187,12 @@
                         Register
                     </button>
 
+                    <!-- Tombol Batal -->
+                    <a href="{{ route('welcome') }}"
+                        class="w-full mt-3 inline-block text-center bg-white/20 border border-white/30 text-white py-3 px-4 rounded-xl font-medium hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent transform transition-all duration-200 hover:scale-[1.02] shadow-md">
+                        Batal
+                    </a>
+
                     <!-- Divider -->
                     <div class="relative my-6">
                         <div class="absolute inset-0 flex items-center">

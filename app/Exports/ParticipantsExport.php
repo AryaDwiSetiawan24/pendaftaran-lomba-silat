@@ -6,16 +6,16 @@ use App\Models\Participant;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
+class ParticipantsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
     /**
     * @return \Illuminate\Database\Query\Builder
     */
     public function query()
     {
-        // 1. Tentukan query untuk mengambil data yang akan diekspor
-        // Kita juga mengambil relasi 'competition' agar bisa menampilkan nama lomba
+        // ambil relasi 'competition' agar bisa menampilkan nama lomba
         return Participant::query()->with('competition');
     }
 
@@ -24,7 +24,6 @@ class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
     */
     public function headings(): array
     {
-        // 2. Tentukan nama header untuk setiap kolom di file Excel
         return [
             'Nama Lengkap',
             'NIK',
@@ -32,6 +31,7 @@ class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
             'kontingen',
             'Lomba',
             'Kategori',
+            'Berat Badan',
             'Kelas Tanding',
             'Jenis Kelamin',
             'Status Validasi',
@@ -44,8 +44,6 @@ class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
     */
     public function map($participant): array
     {
-        // 3. Inilah bagian untuk memilih kolom yang akan dicetak
-        // Urutannya harus sama dengan urutan di headings()
         return [
             $participant->full_name,
             "'" . $participant->nik, // Tambahkan ' di depan NIK agar tidak jadi scientific notation
@@ -53,6 +51,7 @@ class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
             $participant->kontingen,
             $participant->competition->name ?? '-', // Gunakan ?? '-' untuk jaga-jaga jika relasi kosong
             $participant->category ?? '-',
+            $participant->body_weight,
             $participant->weight_class,
             $participant->gender == 'L' ? 'Laki-laki' : 'Perempuan',
             ucfirst($participant->validation_status), // 'pending' -> 'Pending'

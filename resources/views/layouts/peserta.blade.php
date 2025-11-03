@@ -8,6 +8,7 @@
     <title>Halaman Peserta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.2.0/css/line.css">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
 </head>
 <style>
     html {
@@ -22,6 +23,9 @@
         <!-- Content area -->
         <main>
             <div class="max-w-7xl mx-auto px-4 py-8 pt-20">
+                <!-- Alert -->
+                <x-alert />
+
                 {{ $slot }}
             </div>
         </main>

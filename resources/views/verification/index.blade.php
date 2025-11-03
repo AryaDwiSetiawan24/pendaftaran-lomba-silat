@@ -83,12 +83,19 @@
                         {{ session('failed') }}</div>
                 @endif
                 <h1 class="text-2xl text-center font-bold text-white">Verifikasi akun anda</h1>
-                
+
+                <!-- Tampilkan email user -->
+                {{-- <p class="text-center text-blue-200 text-sm mb-6">
+                    OTP akan dikirim ke alamat email:
+                    <span class="font-semibold text-white">{{ $user->email ?? 'Tidak tersedia' }}</span>
+                </p> --}}
+
                 <form action="/verify" method="POST">
                     @csrf
                     <div class="mt-6 text-center">
                         <input type="hidden" name="type" value="register">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <button type="submit"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             Kirim OTP ke email anda
                         </button>
                     </div>

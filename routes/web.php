@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\CompetitionController;
 use App\Http\Controllers\Admin\TournamentPoolController;
 
 // Guest Route
-Route::get('/', [DashboardController::class, 'index']);
+Route::get('/', [DashboardController::class, 'index'])->name('welcome');
 
 // Auth Routes
 Route::get('/login', fn() => view('auth.login'))->name('login');
@@ -46,12 +46,13 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::get('/admin/lomba/edit/{id}', [CompetitionController::class, 'edit'])->name('admin.lomba.edit');
     Route::put('/admin/lomba/edit/{id}', [CompetitionController::class, 'update'])->name('admin.lomba.update');
     Route::delete('/admin/lomba/destroy/{id}', [CompetitionController::class, 'destroy'])->name('admin.lomba.destroy');
+    Route::patch('/admin/lomba/{id}/toggle-visibility', [CompetitionController::class, 'toggleVisibility'])->name('admin.lomba.toggleVisibility');
 
     // Routes untuk Admin - Peserta
     Route::get('/peserta/{participant}', [ParticipantsController::class, 'showPeserta'])->name('admin.peserta.show');
     Route::patch('/peserta/{participant}/approve', [ParticipantsController::class, 'approve'])->name('admin.peserta.approve');
     Route::patch('/peserta/{participant}/reject', [ParticipantsController::class, 'reject'])->name('admin.peserta.reject');
-    Route::delete('/peserta/{participant}', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
+    Route::delete('/peserta/{participant}/delete', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
     Route::get('/peserta/{participant}/edit', [ParticipantsController::class, 'editPeserta'])->name('admin.peserta.edit');
     Route::put('/peserta/{participant}/update', [ParticipantsController::class, 'updatePeserta'])->name('admin.peserta.update');
     Route::get('/admin/peserta/export', [ParticipantsController::class, 'export'])->name('admin.peserta.export');
@@ -66,6 +67,12 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::post('/admin/jadwal/{id}/generate-pools', [TournamentPoolController::class, 'generate'])->name('admin.jadwal.generate-pools');
     Route::post('/admin/jadwal/{competitionId}/generate-matches', [TournamentPoolController::class, 'generateMatches'])->name('admin.jadwal.generateMatches');
 
+    // Export jadwal pertandingan ke Excel
+    Route::get('/admin/jadwal/{competitionId}/export-excel', [JadwalController::class, 'exportExcel'])
+        ->name('admin.jadwal.export.excel');
+    Route::get('/admin/jadwal/{competitionId}/export-pool', [TournamentPoolController::class, 'exportPool'])
+        ->name('admin.jadwal.exportPool');
+
     // Routes untuk Admin - Jadwal Pertandingan (lama)
     Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'details']);
     Route::post('/admin/jadwal/{id}/winner', [JadwalController::class, 'setWinner'])->name('admin.jadwal.winner');
@@ -75,20 +82,13 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::delete('/admin/jadwal/{id}', [JadwalController::class, 'destroy'])->name('admin.jadwal.destroy');
 
     // Get participants by competition
-    Route::get('/admin/jadwal/participants/{competition_id}', [JadwalController::class, 'getParticipants'])
-        ->name('jadwal.participants');
-
+    Route::get('/admin/jadwal/participants/{competition_id}', [JadwalController::class, 'getParticipants'])->name('jadwal.participants');
     // Get match details
-    Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'getMatchDetails'])
-        ->name('jadwal.details');
-
+    Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'getMatchDetails'])->name('jadwal.details');
     // Set winner
-    Route::patch('/admin/jadwal/{id}/winner', [JadwalController::class, 'setWinner'])
-        ->name('jadwal.winner');
-
+    Route::patch('/admin/jadwal/{id}/winner', [JadwalController::class, 'setWinner'])->name('jadwal.winner');
     // Generate bracket (optional)
-    Route::post('/admin/jadwal/generate-bracket', [JadwalController::class, 'generateBracket'])
-        ->name('jadwal.generate');
+    Route::post('/admin/jadwal/generate-bracket', [JadwalController::class, 'generateBracket'])->name('jadwal.generate');
 });
 
 // peserta
