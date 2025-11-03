@@ -58,6 +58,8 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kontingen</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Lomba</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat
+                            </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
@@ -74,6 +76,15 @@
                                 <td class="px-6 py-4 text-gray-600">{{ $p->kontingen ?? '-' }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $p->competition->name }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $p->category }}</td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                        {{ $p->weight_class ?? '-' }}
+                                    </span>
+                                    <span class="font-medium text-gray-800">
+                                        {{ $p->body_weight ? $p->body_weight . ' kg' : '-' }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4">
                                     @php
                                         $statusConfig = [

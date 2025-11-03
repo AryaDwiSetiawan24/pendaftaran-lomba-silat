@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Participant;
-use App\Models\TournamentPool;
 use App\Models\Schedule;
+use App\Models\Participant;
 use Illuminate\Http\Request;
+use App\Models\TournamentPool;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TournamentPoolExport;
 
 class TournamentPoolController extends Controller
 {
@@ -107,22 +109,62 @@ class TournamentPoolController extends Controller
         $grouped = $participants->groupBy(fn($p) => "{$p->gender}-{$p->category}-{$p->temp_weight_class}");
 
         $poolCount = 0;
-        foreach ($grouped as $key => $group) {
-            $poolCount++;
-            $seedOrder = 1;
 
-            foreach ($group as $participant) {
-                TournamentPool::create([
-                    'competition_id' => $competitionId,
-                    'participant_id' => $participant->id,
-                    'pool' => $poolCount, // setiap kombinasi unik menjadi 1 pool
-                    'seed_order' => $seedOrder++,
-                ]);
+        foreach ($grouped as $key => $group) {
+            $total = $group->count();
+
+            // Jika <=4 peserta, langsung satu pool
+            if ($total <= 4) {
+                $poolCount++;
+                $seedOrder = 1;
+
+                foreach ($group as $participant) {
+                    TournamentPool::create([
+                        'competition_id' => $competitionId,
+                        'participant_id' => $participant->id,
+                        'pool' => $poolCount,
+                        'seed_order' => $seedOrder++,
+                    ]);
+                }
+                continue;
+            }
+
+            // Jika >4 peserta, bagi rata ke beberapa pool dengan max 4
+            $poolTotal = ceil($total / 4); // berapa pool yang dibutuhkan
+            $perPool = intdiv($total, $poolTotal); // jumlah rata-rata peserta per pool
+            $sisa = $total % $poolTotal; // sisanya dibagi ke pool pertama
+
+            $index = 0;
+            for ($i = 0; $i < $poolTotal; $i++) {
+                $jumlahPeserta = $perPool + ($i < $sisa ? 1 : 0); // bagi sisa secara merata
+                $chunk = $group->slice($index, $jumlahPeserta);
+                $index += $jumlahPeserta;
+
+                $poolCount++;
+                $seedOrder = 1;
+
+                foreach ($chunk as $participant) {
+                    TournamentPool::create([
+                        'competition_id' => $competitionId,
+                        'participant_id' => $participant->id,
+                        'pool' => $poolCount,
+                        'seed_order' => $seedOrder++,
+                    ]);
+                }
             }
         }
 
         return redirect()->route('admin.jadwal.pool', ['competitionId' => $competitionId])
             ->with('success', "Berhasil membentuk {$poolCount} pool berdasarkan gender, kategori, dan kelas berat tanpa mengubah data peserta.");
+    }
+
+    /**
+     * Export pool ke Excel
+     */
+    public function exportPool($competitionId)
+    {
+        $fileName = 'pool-kompetisi-' . $competitionId . '.xlsx';
+        return Excel::download(new TournamentPoolExport($competitionId), $fileName);
     }
 
     /**

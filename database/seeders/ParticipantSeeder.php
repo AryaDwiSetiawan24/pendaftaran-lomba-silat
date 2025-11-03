@@ -30,10 +30,11 @@ class ParticipantSeeder extends Seeder
         }
 
         $categories = [
-            'USIA DINI (SD)',
+            'USIA DINI 1 (SD)',
+            'USIA DINI 2 (SD)',
             'PRA REMAJA (SMP)',
             'REMAJA (SMA/K/MA)',
-            'DEWASA (MAHASISWA/UMUM)'
+            // 'DEWASA (MAHASISWA/UMUM)'
         ];
 
         $statuses = ['pending', 'approved', 'rejected'];
@@ -77,7 +78,9 @@ class ParticipantSeeder extends Seeder
     private function generateWeightForCategory($category, $faker)
     {
         switch ($category) {
-            case 'USIA DINI (SD)':
+            case 'USIA DINI 1 (SD)':
+                return $faker->randomFloat(2, 26, 44);
+            case 'USIA DINI 2 (SD)':
                 return $faker->randomFloat(2, 26, 44);
             case 'PRA REMAJA (SMP)':
                 return $faker->randomFloat(2, 30, 57);
@@ -98,7 +101,18 @@ class ParticipantSeeder extends Seeder
         $class = 'N/A'; // Default jika tidak ada yang cocok
 
         switch ($category) {
-            case 'USIA DINI (SD)':
+            case 'USIA DINI 1 (SD)':
+                if ($weight >= 26 && $weight <= 28) $class = 'A';
+                elseif ($weight > 28 && $weight <= 30) $class = 'B';
+                elseif ($weight > 30 && $weight <= 32) $class = 'C';
+                elseif ($weight > 32 && $weight <= 34) $class = 'D';
+                elseif ($weight > 34 && $weight <= 36) $class = 'E';
+                elseif ($weight > 36 && $weight <= 38) $class = 'F';
+                elseif ($weight > 38 && $weight <= 40) $class = 'G';
+                elseif ($weight > 40 && $weight <= 42) $class = 'H';
+                elseif ($weight > 42 && $weight <= 44) $class = 'I';
+                break;
+            case 'USIA DINI 2 (SD)':
                 if ($weight >= 26 && $weight <= 28) $class = 'A';
                 elseif ($weight > 28 && $weight <= 30) $class = 'B';
                 elseif ($weight > 30 && $weight <= 32) $class = 'C';

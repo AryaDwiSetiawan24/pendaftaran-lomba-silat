@@ -48,6 +48,10 @@
                     Generate Grup
                 </button>
             </form>
+            <a href="{{ route('admin.jadwal.exportPool', $competition->id) }}"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                🧾 Export Pool (Excel)
+            </a>
             <a href="{{ route('admin.jadwal.view', $competition->id) }}"
                 class="inline-flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium transition">
                 <i class="uil uil-eye mr-2"></i>

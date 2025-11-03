@@ -54,15 +54,13 @@ class DashboardController extends Controller
             ->where('user_id', $user->id);
 
         // 2️⃣ Hitung statistik peserta
-        $statistics = (clone $myCompetitionsQuery)
-            ->selectRaw('
-            COUNT(*) as total_participants,
-            COUNT(DISTINCT competition_id) as total_competitions,
-            SUM(CASE WHEN validation_status = "approved" THEN 1 ELSE 0 END) as approved_count,
-            SUM(CASE WHEN validation_status = "pending" THEN 1 ELSE 0 END) as pending_count,
-            SUM(CASE WHEN validation_status = "rejected" THEN 1 ELSE 0 END) as rejected_count
-        ')
-            ->first();
+        $totalParticipants = Participant::count();
+        $totalCompetitions = (clone $myCompetitionsQuery)
+            ->distinct('competition_id')
+            ->count('competition_id');
+        $pendingCount = Participant::where('validation_status', 'pending')->count();
+        $approvedCount = Participant::where('validation_status', 'approved')->count();
+        $rejectedCount = Participant::where('validation_status', 'rejected')->count();
 
         // 3️⃣ Ambil daftar lomba yang masih dibuka
         $competitions = Competition::where('status', 'dibuka')
@@ -71,39 +69,42 @@ class DashboardController extends Controller
 
         // 4️⃣ Ambil jadwal pertandingan user (UPDATED)
         // Cari ID participant user yang sudah approved
-        $participantIds = Participant::where('user_id', $user->id)
-            ->where('validation_status', 'approved')
-            ->pluck('id');
+        // $participantIds = Participant::where('user_id', $user->id)
+        //     ->where('validation_status', 'approved')
+        //     ->pluck('id');
 
         // Ambil jadwal dimana user adalah participant1 ATAU participant2
-        $schedules = Schedule::with([
-            'competition:id,name,competition_date,competition_logo,visible_schedule',
-            'participant1:id,full_name,weight_class,category,nik,kontingen',
-            'participant2:id,full_name,weight_class,category,nik,kontingen',
-            'winner:id,full_name'
-        ])
-            ->where(function ($q) use ($participantIds) {
-                $q->whereIn('participant1_id', $participantIds)
-                    ->orWhereIn('participant2_id', $participantIds);
-            })
-            ->whereHas('competition', function ($q) {
-                $q->where('visible_schedule', true)
-                    ->whereNotNull('competition_date')
-                    ->where('status', 'dibuka');
-            })
-            ->orderBy('match_time', 'asc')
-            ->paginate(5, ['*'], 'schedule_page');
+        // $schedules = Schedule::with([
+        //     'competition:id,name,competition_date,competition_logo,visible_schedule',
+        //     'participant1:id,full_name,weight_class,category,nik,kontingen',
+        //     'participant2:id,full_name,weight_class,category,nik,kontingen',
+        //     'winner:id,full_name'
+        // ])
+        //     ->where(function ($q) use ($participantIds) {
+        //         $q->whereIn('participant1_id', $participantIds)
+        //             ->orWhereIn('participant2_id', $participantIds);
+        //     })
+        //     ->whereHas('competition', function ($q) {
+        //         $q->where('visible_schedule', true)
+        //             ->whereNotNull('competition_date')
+        //             ->where('status', 'dibuka');
+        //     })
+        //     ->orderBy('match_time', 'asc')
+        //     ->paginate(5, ['*'], 'schedule_page');
 
         // 5️⃣ Kumpulkan statistik
-        $stats = [
-            'total_participants' => $statistics->total_participants ?? 0,
-            'total_competitions' => $statistics->total_competitions ?? 0,
-            'approved_count' => $statistics->approved_count ?? 0,
-            'pending_count' => $statistics->pending_count ?? 0,
-            'rejected_count' => $statistics->rejected_count ?? 0,
-        ];
+        // $stats = [
+        //     'total_competitions' => $statistics->total_competitions ?? 0,
+        // ];
 
         // 6️⃣ Kirim ke view
-        return view('pages.peserta.dashboard', compact('competitions', 'schedules', 'stats'));
+        return view('pages.peserta.dashboard', compact(
+            'competitions',
+            'totalParticipants',
+            'pendingCount',
+            'approvedCount',
+            'rejectedCount',
+            'totalCompetitions'
+        ));
     }
 }

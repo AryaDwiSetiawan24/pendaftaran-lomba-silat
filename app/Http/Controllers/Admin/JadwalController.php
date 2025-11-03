@@ -39,13 +39,13 @@ class JadwalController extends Controller
     /**
      * Handle permintaan untuk men-download jadwal sebagai file Excel.
      */
-    public function exportExcel()
+    public function exportExcel($competitionId)
     {
         // Tentukan nama file saat di-download
-        $fileName = 'jadwal_pertandingan_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'jadwal_pertandingan_'. $competitionId . '_' . date('Y-m-d') . '.xlsx';
 
         // Panggil fungsi download dari Maatwebsite\Excel
-        return Excel::download(new SchedulesExport, $fileName);
+        return Excel::download(new SchedulesExport($competitionId), $fileName);
     }
 
     public function index1(Request $request)

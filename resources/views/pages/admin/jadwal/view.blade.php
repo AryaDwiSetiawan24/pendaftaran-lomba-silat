@@ -43,7 +43,7 @@
                         Kelola Grup
                     </a>
 
-                    <a href="{{ route('admin.jadwal.export.excel') }}"
+                    <a href="{{ route('admin.jadwal.export.excel', $competition->id) }}"
                         class="px-5 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-semibold text-sm inline-flex items-center hover:-translate-y-0.5">
                         <i class="uil uil-download-alt mr-2"></i>
                         Export Jadwal

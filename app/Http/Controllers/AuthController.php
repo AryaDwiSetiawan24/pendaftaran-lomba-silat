@@ -67,6 +67,7 @@ class AuthController extends Controller
                     'google_id' => $googleUser->getId(),
                     'avatar'    => $googleUser->getAvatar(),
                     'role'      => 'peserta', // default role
+                    'status'      => 'active', // status aktif tanpa otp
                     'password'  => Hash::make(Str::random(24)), // random password
                 ]);
             }
@@ -92,6 +93,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        return redirect('/login')->with('success', 'Logout berhasil!');
+        return redirect('/')->with('success', 'Logout berhasil!');
     }
 }

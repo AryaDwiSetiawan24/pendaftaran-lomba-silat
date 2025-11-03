@@ -107,7 +107,7 @@
                     <!-- Additional Quick Actions -->
                     <div class="mt-4 pt-4 border-t border-gray-200">
                         <div class="flex items-center justify-between text-xs">
-                            <a href="{{ route('admin.jadwal.export.excel') }}"
+                            <a href="{{ route('admin.jadwal.export.excel', $competition->id) }}"
                                 class="text-gray-600 hover:text-red-900 transition flex items-center">
                                 <i class="uil uil-download-alt mr-1"></i>
                                 Export Jadwal

@@ -11,15 +11,23 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class SchedulesExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
+    protected $competitionId;
+
     /**
-     * Mengambil data dari database dengan Eager Loading.
-     * `with()` akan mengambil data relasi dalam satu query efisien.
+     * Konstruktor untuk menerima ID lomba
+     */
+    public function __construct($competitionId)
+    {
+        $this->competitionId = $competitionId;
+    }
+
+    /**
+     * Ambil data schedule berdasarkan competition_id
      */
     public function query()
     {
-        // Beritahu Eloquent untuk mengambil data Schedule BERSAMA DENGAN
-        // data dari relasi competition, participant1, dan participant2.
         return Schedule::with(['competition', 'participant1', 'participant2'])
+            ->where('competition_id', $this->competitionId)
             ->orderBy('match_time', 'asc');
     }
 

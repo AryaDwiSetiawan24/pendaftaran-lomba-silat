@@ -56,7 +56,7 @@
         </div>
 
         @php
-            $categories = ['USIA DINI (SD)', 'PRA REMAJA (SMP)', 'REMAJA (SMA/K/MA)', 'DEWASA (MAHASISWA/UMUM)'];
+            $categories = ['USIA DINI 1 (SD)', 'USIA DINI 2 (SD)', 'PRA REMAJA (SMP)', 'REMAJA (SMA/K/MA)'];
         @endphp
         <div class="bg-white rounded-xl shadow-sm border p-6 mt-6">
             <h3 class="text-lg font-semibold mb-4">Jumlah Peserta per Kategori</h3>

@@ -105,17 +105,19 @@
                     <select name="category"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-red-800">
                         <option value="">Semua Kategori</option>
-                        <option value="USIA DINI (SD)" {{ request('category') == 'USIA DINI (SD)' ? 'selected' : '' }}>
-                            USIA DINI (SD)</option>
+                        <option value="USIA DINI 1 (SD)" {{ request('category') == 'USIA DINI (SD)' ? 'selected' : '' }}>
+                            USIA DINI 1 (SD)</option>
+                        <option value="USIA DINI 2 (SD)" {{ request('category') == 'USIA DINI (SD)' ? 'selected' : '' }}>
+                            USIA DINI 2 (SD)</option>
                         <option value="PRA REMAJA (SMP)"
                             {{ request('category') == 'PRA REMAJA (SMP)' ? 'selected' : '' }}>PRA REMAJA (SMP)
                         </option>
                         <option value="REMAJA (SMA/K/MA)"
                             {{ request('category') == 'REMAJA (SMA/K/MA)' ? 'selected' : '' }}>REMAJA (SMA/K/MA)
                         </option>
-                        <option value="DEWASA (MAHASISWA/UMUM)"
+                        {{-- <option value="DEWASA (MAHASISWA/UMUM)"
                             {{ request('category') == 'DEWASA (MAHASISWA/UMUM)' ? 'selected' : '' }}>DEWASA
-                            (Mahasiswa/Umum)</option>
+                            (Mahasiswa/Umum)</option> --}}
                     </select>
                 </div>
 
@@ -139,18 +141,21 @@
                         class="flex-1 px-4 py-2 bg-red-800 text-white rounded-lg hover:bg-red-700 transition font-semibold">
                         <i class="uil uil-filter mr-2"></i> Terapkan
                     </button>
+
                     <!-- reset filter -->
                     <a href="{{ route('admin.peserta') }}"
                         class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
                         title="Reset Filter">
                         <i class="uil uil-redo"></i>
                     </a>
+
                     <!-- trash -->
                     {{-- <button type="button" onclick="window.print()"
                         class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
                         title="Cetak">
                         <i class="uil uil-print"></i>
                     </button> --}}
+
                     <!-- export excel -->
                     <a href="{{ route('admin.peserta.export') }}"
                         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
@@ -497,35 +502,4 @@
             </div>
         @endif
     </div>
-
-    <!-- Alert -->
-    {{-- @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
-        @if (session($type))
-            <div id="{{ $type }}Alert"
-                class="fixed top-20 right-4 bg-{{ $color }}-500 text-white px-5 py-4 rounded-lg shadow-lg flex items-center gap-3 z-50">
-                <i
-                    class="uil {{ $type == 'success' ? 'uil-check-circle' : 'uil-exclamation-triangle' }} text-2xl"></i>
-                <div>
-                    <p class="font-semibold capitalize">{{ $type }}</p>
-                    <p class="text-sm">{{ session($type) }}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="ml-3 hover:text-gray-200">
-                    <i class="uil uil-times text-xl"></i>
-                </button>
-            </div>
-        @endif
-    @endforeach
-
-    <script>
-        setTimeout(() => {
-            ['successAlert', 'errorAlert'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.style.transition = 'opacity 0.5s';
-                    el.style.opacity = 0;
-                    setTimeout(() => el.remove(), 500);
-                }
-            });
-        }, 4000);
-    </script> --}}
 </x-admin-layout>

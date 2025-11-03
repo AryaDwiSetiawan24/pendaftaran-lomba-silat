@@ -26,7 +26,7 @@
                 </div>
             </div>
             <p class="text-gray-500 text-xs sm:text-sm mb-1">Total Pendaftaran</p>
-            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $stats['total_participants'] }}</p>
+            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $totalParticipants }}</p>
         </div>
 
         <!-- Lomba Diikuti -->
@@ -37,7 +37,7 @@
                 </div>
             </div>
             <p class="text-gray-500 text-xs sm:text-sm mb-1">Lomba Diikuti</p>
-            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $stats['total_competitions'] }}</p>
+            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $totalCompetitions }}</p>
         </div>
 
         <!-- Disetujui -->
@@ -48,7 +48,7 @@
                 </div>
             </div>
             <p class="text-gray-500 text-xs sm:text-sm mb-1">Disetujui</p>
-            <p class="text-2xl sm:text-4xl font-bold text-green-600">{{ $stats['approved_count'] }}</p>
+            <p class="text-2xl sm:text-4xl font-bold text-green-600">{{ $approvedCount }}</p>
         </div>
 
         <!-- Menunggu -->
@@ -59,7 +59,7 @@
                 </div>
             </div>
             <p class="text-gray-500 text-xs sm:text-sm mb-1">Menunggu</p>
-            <p class="text-2xl sm:text-4xl font-bold text-yellow-600">{{ $stats['pending_count'] }}</p>
+            <p class="text-2xl sm:text-4xl font-bold text-yellow-600">{{ $pendingCount }}</p>
         </div>
 
         <!-- Ditolak -->
@@ -70,7 +70,7 @@
                 </div>
             </div>
             <p class="text-gray-500 text-xs sm:text-sm mb-1">Ditolak</p>
-            <p class="text-2xl sm:text-4xl font-bold text-red-600">{{ $stats['rejected_count'] }}</p>
+            <p class="text-2xl sm:text-4xl font-bold text-red-600">{{ $rejectedCount }}</p>
         </div>
     </div>
 
@@ -84,8 +84,129 @@
         </a>
     </div>
 
+    <!-- Lomba Tersedia -->
+    <div class="bg-white rounded-xl shadow-md" id="lomba-tersedia">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="uil uil-trophy text-red-900"></i>
+                Lomba Tersedia
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Daftar lomba yang sedang dibuka</p>
+        </div>
+        <div class="p-4 sm:p-6">
+            @forelse ($competitions as $competition)
+                <div
+                    class="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-lg hover:border-red-200 transition-all duration-300 mb-4 last:mb-0">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <!-- Logo dan Info Lomba -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+                            @if ($competition->competition_logo)
+                                <div class="flex-shrink-0">
+                                    <img src="{{ asset('storage/' . $competition->competition_logo) }}"
+                                        alt="Logo {{ $competition->name }}"
+                                        class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-lg border-2 border-gray-100 bg-gray-50 p-2">
+                                </div>
+                            @endif
+
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg sm:text-xl font-bold mb-2 text-red-900 line-clamp-2">
+                                    {{ $competition->name }}
+                                </h3>
+                                <div class="space-y-2">
+                                    <div class="flex items-start text-sm text-gray-700">
+                                        <i class="uil uil-calendar text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
+                                        <span class="font-medium">
+                                            {{ $competition->competition_date ? $competition->competition_date->format('d M Y, H:i') : 'Belum dijadwalkan' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-start text-sm text-gray-600">
+                                        <i class="uil uil-clock text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
+                                        <span>
+                                            <span class="font-medium">Pendaftaran:</span>
+                                            {{ $competition->registration_start_date->format('d M Y') }} –
+                                            {{ $competition->registration_end_date->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                    @if ($competition->location)
+                                        <div class="flex items-start text-sm text-gray-600">
+                                            <i class="uil uil-map-marker text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
+                                            <span>{{ $competition->location }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div
+                            class="flex flex-col sm:flex-row gap-3 lg:flex-col xl:flex-row lg:min-w-[140px] xl:min-w-[280px]">
+                            <a href="{{ route('peserta.lomba.show', $competition->id) }}"
+                                class="flex-1 sm:flex-none px-5 py-2.5 bg-white border-2 border-red-900 text-red-900 rounded-lg hover:bg-red-50 transition-all duration-200 font-semibold text-center text-sm sm:text-base whitespace-nowrap">
+                                <i class="uil uil-info-circle mr-1"></i>
+                                Lihat Detail
+                            </a>
+                            <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
+                                class="flex-1 sm:flex-none px-5 py-2.5 bg-red-900 text-white rounded-lg hover:bg-red-800 hover:shadow-md transition-all duration-200 font-semibold text-center text-sm sm:text-base whitespace-nowrap">
+                                <i class="uil uil-check-circle mr-1"></i>
+                                Daftar Sekarang
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    @php
+                        $now = now();
+                        $isOpen = $now->between(
+                            $competition->registration_start_date,
+                            $competition->registration_end_date,
+                        );
+                        $isComing = $now->lt($competition->registration_start_date);
+                        $isClosed = $now->gt($competition->registration_end_date);
+                    @endphp
+
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        @if ($isOpen)
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                Pendaftaran Dibuka
+                            </span>
+                        @elseif ($isComing)
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                                <i class="uil uil-clock-three mr-1"></i>
+                                Akan Dibuka
+                            </span>
+                        @elseif ($isClosed)
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                                <i class="uil uil-lock mr-1"></i>
+                                Pendaftaran Ditutup
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                        <i class="uil uil-trophy text-3xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-500 text-lg">Belum ada lomba yang tersedia untuk pendaftaran.</p>
+                    <p class="text-gray-400 text-sm mt-2">Silakan cek kembali nanti</p>
+                </div>
+            @endforelse
+
+            <!-- Pagination Lomba -->
+            @if ($competitions->hasPages())
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    {{ $competitions->links() }}
+                </div>
+            @endif
+        </div>
+    </div>
+
     <!-- Jadwal Pertandingan Saya -->
-    <div class="bg-white rounded-xl shadow-md mb-8" id="jadwal-pertandingan">
+    {{-- <div class="bg-white rounded-xl shadow-md mt-8" id="jadwal-pertandingan">
         <div class="p-6 border-b border-gray-200 flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -313,8 +434,7 @@
                         <i class="uil uil-calendar-slash text-4xl text-gray-400"></i>
                     </div>
                     <p class="text-gray-500 text-lg font-semibold">Belum ada jadwal pertandingan</p>
-                    <p class="text-gray-400 text-sm mt-2">Jadwal akan muncul setelah panitia menyusun bracket
-                        pertandingan</p>
+                    <p class="text-gray-400 text-sm mt-2">Fitur masih dalam pengembangan.</p>
                 </div>
             @endforelse
 
@@ -325,128 +445,7 @@
                 </div>
             @endif
         </div>
-    </div>
-
-    <!-- Lomba Tersedia -->
-    <div class="bg-white rounded-xl shadow-md" id="lomba-tersedia">
-        <div class="p-6 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="uil uil-trophy text-red-900"></i>
-                Lomba Tersedia
-            </h2>
-            <p class="text-sm text-gray-500 mt-1">Daftar lomba yang sedang dibuka</p>
-        </div>
-        <div class="p-4 sm:p-6">
-            @forelse ($competitions as $competition)
-                <div
-                    class="border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-lg hover:border-red-200 transition-all duration-300 mb-4 last:mb-0">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <!-- Logo dan Info Lomba -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-                            @if ($competition->competition_logo)
-                                <div class="flex-shrink-0">
-                                    <img src="{{ asset('storage/' . $competition->competition_logo) }}"
-                                        alt="Logo {{ $competition->name }}"
-                                        class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-lg border-2 border-gray-100 bg-gray-50 p-2">
-                                </div>
-                            @endif
-
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-lg sm:text-xl font-bold mb-2 text-red-900 line-clamp-2">
-                                    {{ $competition->name }}
-                                </h3>
-                                <div class="space-y-2">
-                                    <div class="flex items-start text-sm text-gray-700">
-                                        <i class="uil uil-calendar text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
-                                        <span class="font-medium">
-                                            {{ $competition->competition_date ? $competition->competition_date->format('d M Y, H:i') : 'Belum dijadwalkan' }}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-start text-sm text-gray-600">
-                                        <i class="uil uil-clock text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
-                                        <span>
-                                            <span class="font-medium">Pendaftaran:</span>
-                                            {{ $competition->registration_start_date->format('d M Y') }} –
-                                            {{ $competition->registration_end_date->format('d M Y') }}
-                                        </span>
-                                    </div>
-                                    @if ($competition->location)
-                                        <div class="flex items-start text-sm text-gray-600">
-                                            <i class="uil uil-map-marker text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
-                                            <span>{{ $competition->location }}</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tombol Aksi -->
-                        <div
-                            class="flex flex-col sm:flex-row gap-3 lg:flex-col xl:flex-row lg:min-w-[140px] xl:min-w-[280px]">
-                            <a href="{{ route('peserta.lomba.show', $competition->id) }}"
-                                class="flex-1 sm:flex-none px-5 py-2.5 bg-white border-2 border-red-900 text-red-900 rounded-lg hover:bg-red-50 transition-all duration-200 font-semibold text-center text-sm sm:text-base whitespace-nowrap">
-                                <i class="uil uil-info-circle mr-1"></i>
-                                Lihat Detail
-                            </a>
-                            <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
-                                class="flex-1 sm:flex-none px-5 py-2.5 bg-red-900 text-white rounded-lg hover:bg-red-800 hover:shadow-md transition-all duration-200 font-semibold text-center text-sm sm:text-base whitespace-nowrap">
-                                <i class="uil uil-check-circle mr-1"></i>
-                                Daftar Sekarang
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Status Badge -->
-                    @php
-                        $now = now();
-                        $isOpen = $now->between(
-                            $competition->registration_start_date,
-                            $competition->registration_end_date,
-                        );
-                        $isComing = $now->lt($competition->registration_start_date);
-                        $isClosed = $now->gt($competition->registration_end_date);
-                    @endphp
-
-                    <div class="mt-4 pt-4 border-t border-gray-100">
-                        @if ($isOpen)
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                                <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                                Pendaftaran Dibuka
-                            </span>
-                        @elseif ($isComing)
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                                <i class="uil uil-clock-three mr-1"></i>
-                                Akan Dibuka
-                            </span>
-                        @elseif ($isClosed)
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
-                                <i class="uil uil-lock mr-1"></i>
-                                Pendaftaran Ditutup
-                            </span>
-                        @endif
-                    </div>
-                </div>
-            @empty
-                <div class="text-center py-12">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                        <i class="uil uil-trophy text-3xl text-gray-400"></i>
-                    </div>
-                    <p class="text-gray-500 text-lg">Belum ada lomba yang tersedia untuk pendaftaran.</p>
-                    <p class="text-gray-400 text-sm mt-2">Silakan cek kembali nanti</p>
-                </div>
-            @endforelse
-
-            <!-- Pagination Lomba -->
-            @if ($competitions->hasPages())
-                <div class="mt-6 pt-4 border-t border-gray-200">
-                    {{ $competitions->links() }}
-                </div>
-            @endif
-        </div>
-    </div>
+    </div> --}}
 
     <!-- Tombol WhatsApp -->
     <a href="https://wa.me/6285172455192" target="_blank"

@@ -6,8 +6,9 @@ use App\Models\Participant;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class ParticipantsExport implements FromQuery, WithHeadings, WithMapping
+class ParticipantsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
     /**
     * @return \Illuminate\Database\Query\Builder

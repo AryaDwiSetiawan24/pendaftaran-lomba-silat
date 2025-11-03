@@ -52,7 +52,7 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::get('/peserta/{participant}', [ParticipantsController::class, 'showPeserta'])->name('admin.peserta.show');
     Route::patch('/peserta/{participant}/approve', [ParticipantsController::class, 'approve'])->name('admin.peserta.approve');
     Route::patch('/peserta/{participant}/reject', [ParticipantsController::class, 'reject'])->name('admin.peserta.reject');
-    Route::delete('/peserta/{participant}', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
+    Route::delete('/peserta/{participant}/delete', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
     Route::get('/peserta/{participant}/edit', [ParticipantsController::class, 'editPeserta'])->name('admin.peserta.edit');
     Route::put('/peserta/{participant}/update', [ParticipantsController::class, 'updatePeserta'])->name('admin.peserta.update');
     Route::get('/admin/peserta/export', [ParticipantsController::class, 'export'])->name('admin.peserta.export');
@@ -68,8 +68,10 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::post('/admin/jadwal/{competitionId}/generate-matches', [TournamentPoolController::class, 'generateMatches'])->name('admin.jadwal.generateMatches');
 
     // Export jadwal pertandingan ke Excel
-    Route::get('/admin/jadwal/export-excel', [JadwalController::class, 'exportExcel'])
+    Route::get('/admin/jadwal/{competitionId}/export-excel', [JadwalController::class, 'exportExcel'])
         ->name('admin.jadwal.export.excel');
+    Route::get('/admin/jadwal/{competitionId}/export-pool', [TournamentPoolController::class, 'exportPool'])
+        ->name('admin.jadwal.exportPool');
 
     // Routes untuk Admin - Jadwal Pertandingan (lama)
     Route::get('/admin/jadwal/{id}/details', [JadwalController::class, 'details']);

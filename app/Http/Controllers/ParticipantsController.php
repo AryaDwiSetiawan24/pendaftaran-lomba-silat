@@ -120,9 +120,9 @@ class ParticipantsController extends Controller
 
     public function editPeserta(Participant $participant)
     {
-        // $participant = Participant::with('competition')->findOrFail($id);
         $categories = [
-            'USIA DINI (SD)',
+            'USIA DINI 1 (SD)',
+            'USIA DINI 2 (SD)',
             'PRA REMAJA (SMP)',
             'REMAJA (SMA/K/MA)',
             'DEWASA (MAHASISWA/UMUM)',
@@ -256,7 +256,7 @@ class ParticipantsController extends Controller
     public function store(Request $request)
     {
         // 1. Validasi Input
-        $validatedData = $request->validate([
+        $request->validate([
             'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
@@ -264,17 +264,18 @@ class ParticipantsController extends Controller
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:L,P',
             'nik' => [
-                'required',
-                'digits:16',
-                // NIK harus unik untuk setiap kompetisi
-                Rule::unique('participants')->where(function ($query) use ($request) {
-                    return $query->where('competition_id', $request->competition_id);
-                }),
+            'required',
+            'digits:16',
+            // NIK harus unik untuk setiap kompetisi
+            Rule::unique('participants')->where(function ($query) use ($request) {
+                return $query->where('competition_id', $request->competition_id);
+            }),
             ],
             'category' => 'required|string|max:255',
-            'body_weight' => 'required|numeric|min:20|max:120', // Input baru
+            'body_weight' => 'required|numeric|min:20|max:120',
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'note' => 'nullable|string',
         ], [
             // Pesan error kustom:
             'nik.unique' => 'NIK ini sudah terdaftar pada kompetisi ini.',
@@ -318,6 +319,7 @@ class ParticipantsController extends Controller
                 'weight_class' => $weightClass,
                 'phone_number' => $request->phone_number,
                 'bukti_bayar' => $path,
+                'note' => $request->note,
             ]);
 
             return redirect()->route('peserta.pendaftaran.index')
@@ -335,7 +337,18 @@ class ParticipantsController extends Controller
     {
         $class = null;
         switch ($category) {
-            case 'USIA DINI (SD)':
+            case 'USIA DINI 1 (SD)':
+                if ($weight >= 26 && $weight <= 28) $class = 'A';
+                elseif ($weight > 28 && $weight <= 30) $class = 'B';
+                elseif ($weight > 30 && $weight <= 32) $class = 'C';
+                elseif ($weight > 32 && $weight <= 34) $class = 'D';
+                elseif ($weight > 34 && $weight <= 36) $class = 'E';
+                elseif ($weight > 36 && $weight <= 38) $class = 'F';
+                elseif ($weight > 38 && $weight <= 40) $class = 'G';
+                elseif ($weight > 40 && $weight <= 42) $class = 'H';
+                elseif ($weight > 42 && $weight <= 44) $class = 'I';
+                break;
+            case 'USIA DINI 2 (SD)':
                 if ($weight >= 26 && $weight <= 28) $class = 'A';
                 elseif ($weight > 28 && $weight <= 30) $class = 'B';
                 elseif ($weight > 30 && $weight <= 32) $class = 'C';
@@ -412,8 +425,8 @@ class ParticipantsController extends Controller
         }
 
         // 1. Validasi Input (diubah ke 'body_weight')
-        $validatedData = $request->validate([
-            'competition_id' => 'required|exists:competitions,id',
+        $request->validate([
+            // 'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
             'place_of_birth' => 'required|string|max:255',
@@ -430,6 +443,7 @@ class ParticipantsController extends Controller
             'body_weight' => 'required|numeric|min:20|max:120', // <-- DIUBAH
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'note' => 'nullable|string',
         ], [
             'nik.unique' => 'NIK ini sudah terdaftar pada lomba yang sama.',
         ]);
@@ -459,7 +473,7 @@ class ParticipantsController extends Controller
 
         // 5. Update Data ke Database
         $participant->update([
-            'competition_id' => $request->competition_id,
+            // 'competition_id' => $request->competition_id,
             'kontingen' => $request->kontingen,
             'full_name' => $request->full_name,
             'place_of_birth' => $request->place_of_birth,
@@ -467,10 +481,11 @@ class ParticipantsController extends Controller
             'gender' => $request->gender,
             'nik' => $request->nik,
             'category' => $request->category,
-            'body_weight' => $request->body_weight,   // <-- DITAMBAHKAN
-            'weight_class' => $weightClass,          // <-- DIUBAH
+            'body_weight' => $request->body_weight,
+            'weight_class' => $weightClass,
             'phone_number' => $request->phone_number,
             'bukti_bayar' => $path,
+            'note' => $request->note,
         ]);
 
         return redirect()->route('peserta.pendaftaran.index')->with('success', 'Data peserta berhasil diperbarui.');
