@@ -44,7 +44,7 @@ class AuthController extends Controller
     // Redirect ke Google
     public function googleRedirect()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     // Callback Google
@@ -52,7 +52,7 @@ class AuthController extends Controller
     {
         try {
             // Ambil data user dari Google
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
 
             // Cari user berdasarkan google_id atau email
             $user = User::where('google_id', $googleUser->getId())
