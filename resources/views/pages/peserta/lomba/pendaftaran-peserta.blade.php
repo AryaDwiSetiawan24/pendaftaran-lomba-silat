@@ -104,10 +104,35 @@
                                             class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs font-medium shadow-sm">
                                             Detail
                                         </a>
-                                        <a href="{{ route('peserta.pendaftaran.edit', $p->id) }}"
-                                            class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-xs font-medium shadow-sm">
-                                            Edit
-                                        </a>
+
+                                        @php
+                                            $now = now();
+                                            $isRegistrationOpen =
+                                                $p->competition &&
+                                                $now->between(
+                                                    $p->competition->registration_start_date,
+                                                    $p->competition->registration_end_date,
+                                                );
+                                        @endphp
+
+                                        @if ($isRegistrationOpen)
+                                            <a href="{{ route('peserta.pendaftaran.edit', $p->id) }}"
+                                                class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-xs font-medium shadow-sm">
+                                                Edit
+                                            </a>
+                                            
+                                            {{-- Hapus --}}
+                                            <form action="{{ route('peserta.pendaftaran.destroy', $p->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs font-medium shadow-sm">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

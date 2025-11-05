@@ -49,8 +49,17 @@
                     <tbody class="divide-y divide-gray-200">
                         @forelse ($competitions as $competition)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium text-gray-800">
-                                    {{ $competition->name }}
+                                <td class="flex items-center px-4 py-3 font-medium text-gray-800 gap-3">
+                                    @if ($competition->competition_logo)
+                                        <img src="{{ asset('storage/' . $competition->competition_logo) }}"
+                                             alt="Logo {{ $competition->name }}"
+                                             class="h-8 w-8 rounded object-cover">
+                                    @else
+                                        <div class="h-8 w-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                                            -
+                                        </div>
+                                    @endif
+                                    <span class="truncate">{{ $competition->name }}</span>
                                 </td>
 
                                 <td class="px-4 py-3 text-gray-600">

@@ -1,7 +1,5 @@
 <x-peserta-layout>
     <h2 class="text-2xl font-bold text-red-900 mb-6">Form Pendaftaran</h2>
-    
-
     <div class="bg-white rounded-xl shadow p-8">
         <h2 class="text-2xl font-bold mb-6">{{ $competition->name }}</h2>
 

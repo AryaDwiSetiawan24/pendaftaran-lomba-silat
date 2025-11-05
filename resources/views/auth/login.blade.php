@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Penilaian Lomba Silat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.2.0/css/line.css">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -52,6 +54,9 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-orange-900 silat-pattern">
+    {{-- alert --}}
+    <x-alert />
+
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
         <div
@@ -67,9 +72,8 @@
         <div class="w-full max-w-md">
             <!-- Logo & Title -->
             <div class="text-center mb-8 fade-in">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl mb-4 shadow-2xl">
-                    <span class="text-3xl">🥋</span>
+                <div class="inline-flex items-center w-20 h-20 mb-4">
+                    <img src="{{ asset('logo.png') }}" alt="Logo">
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Pendaftaran Lomba Silat</h1>
                 <p class="text-blue-200 text-sm mt-2">Masuk untuk mengakses sistem pendaftaran lomba silat</p>
@@ -154,7 +158,7 @@
                         class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transform transition-all duration-200 hover:scale-[1.02] shadow-lg">
                         Masuk
                     </button>
-                    
+
                     <!-- Tombol Batal -->
                     <a href="{{ route('welcome') }}"
                         class="w-full mt-3 inline-block text-center bg-white/20 border border-white/30 text-white py-3 px-4 rounded-xl font-medium hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent transform transition-all duration-200 hover:scale-[1.02] shadow-md">

@@ -17,7 +17,7 @@ Route::get('/login', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', fn() => view('auth.register'))->name('register');
 Route::post('/register', [AuthController::class, 'register']);
-Route::get('/logout', [AuthController::class, 'logout']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Google OAuth Routes
 Route::get('/auth/google/redirect', [AuthController::class, 'googleRedirect'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])->name('auth.google.callback');
@@ -49,12 +49,12 @@ Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
     Route::patch('/admin/lomba/{id}/toggle-visibility', [CompetitionController::class, 'toggleVisibility'])->name('admin.lomba.toggleVisibility');
 
     // Routes untuk Admin - Peserta
-    Route::get('/peserta/{participant}', [ParticipantsController::class, 'showPeserta'])->name('admin.peserta.show');
-    Route::patch('/peserta/{participant}/approve', [ParticipantsController::class, 'approve'])->name('admin.peserta.approve');
-    Route::patch('/peserta/{participant}/reject', [ParticipantsController::class, 'reject'])->name('admin.peserta.reject');
-    Route::delete('/peserta/{participant}/delete', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
-    Route::get('/peserta/{participant}/edit', [ParticipantsController::class, 'editPeserta'])->name('admin.peserta.edit');
-    Route::put('/peserta/{participant}/update', [ParticipantsController::class, 'updatePeserta'])->name('admin.peserta.update');
+    Route::get('/admin/peserta/{participant}', [ParticipantsController::class, 'showPeserta'])->name('admin.peserta.show');
+    Route::patch('/admin/peserta/{participant}/approve', [ParticipantsController::class, 'approve'])->name('admin.peserta.approve');
+    Route::patch('/admin/peserta/{participant}/reject', [ParticipantsController::class, 'reject'])->name('admin.peserta.reject');
+    Route::delete('/admin/peserta/{participant}/delete', [ParticipantsController::class, 'destroy'])->name('admin.peserta.destroy');
+    Route::get('/admin/peserta/{participant}/edit', [ParticipantsController::class, 'editPeserta'])->name('admin.peserta.edit');
+    Route::put('/admin/peserta/{participant}/update', [ParticipantsController::class, 'updatePeserta'])->name('admin.peserta.update');
     Route::get('/admin/peserta/export', [ParticipantsController::class, 'export'])->name('admin.peserta.export');
 
     // Routes untuk Admin - Jadwal Pertandingan
@@ -97,13 +97,14 @@ Route::group(['middleware' => ['auth', 'check_role:peserta', 'check_status']], f
     Route::get('/peserta', [DashboardController::class, 'pesertaDashboard'])->name('peserta.dashboard');
 
     // Competition Routes
-    Route::get('/lomba/{competition}', [ParticipantsController::class, 'show'])->name('peserta.lomba.show');
-    Route::get('/lomba/{competition}/daftar', [ParticipantsController::class, 'create'])->name('peserta.lomba.daftar');
-    Route::post('/lomba/{competition}/daftar', [ParticipantsController::class, 'store'])->name('peserta.lomba.store');
+    Route::get('/peserta/lomba/{competition}', [ParticipantsController::class, 'show'])->name('peserta.lomba.show');
+    Route::get('/peserta/lomba/{competition}/daftar', [ParticipantsController::class, 'create'])->name('peserta.lomba.daftar');
+    Route::post('/peserta/lomba/{competition}/daftar', [ParticipantsController::class, 'store'])->name('peserta.lomba.store');
 
     // Pendaftaran Saya Routes
-    Route::get('/pendaftaran-saya', [ParticipantsController::class, 'index'])->name('peserta.pendaftaran.index');
-    Route::get('/pendaftaran-saya/{participant}', [ParticipantsController::class, 'showParticipant'])->name('peserta.pendaftaran.show');
-    Route::get('/pendaftaran/{participant}/edit', [ParticipantsController::class, 'edit'])->name('peserta.pendaftaran.edit');
-    Route::put('/pendaftaran/{participant}', [ParticipantsController::class, 'update'])->name('peserta.pendaftaran.update');
+    Route::get('/peserta/pendaftaran-saya', [ParticipantsController::class, 'index'])->name('peserta.pendaftaran.index');
+    Route::get('/peserta/pendaftaran-saya/{participant}', [ParticipantsController::class, 'showParticipant'])->name('peserta.pendaftaran.show');
+    Route::get('/peserta/pendaftaran/{participant}/edit', [ParticipantsController::class, 'edit'])->name('peserta.pendaftaran.edit');
+    Route::put('/peserta/pendaftaran/{participant}', [ParticipantsController::class, 'update'])->name('peserta.pendaftaran.update');
+    Route::delete('/peserta/pendaftaran/{participant}/destroy', [ParticipantsController::class, 'participantDestroy'])->name('peserta.pendaftaran.destroy');
 });
