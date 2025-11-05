@@ -39,7 +39,7 @@
                     @endphp
                     <div
                         class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 {{ $status['bg'] }} {{ $status['border'] }}">
-                        <i class="uil {{ $status['icon'] }} text-lg {{ $status['text'] }}"></i>
+                        <i class="uil {{ $status['icon'] }} text-xs lg:text-lg {{ $status['text'] }}"></i>
                         <span class="font-semibold {{ $status['text'] }}">
                             {{ ucfirst($participant->validation_status) }}
                         </span>
@@ -118,7 +118,7 @@
                 </div>
 
                 <!-- Bukti Pembayaran -->
-                @if ($participant->bukti_bayar)
+                {{-- @if ($participant->bukti_bayar)
                     <div class="border-t border-gray-200 pt-8">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                             <i class="uil uil-receipt text-blue-600"></i>
@@ -144,14 +144,14 @@
                             </div>
                         </div>
                     </div>
-                @endif
+                @endif --}}
 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
                     <a href="{{ url()->previous() }}"
                         class="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium">
                         <i class="uil uil-arrow-left"></i>
-                        Kembali ke Halaman Sebelumnya
+                        Kembali
                     </a>
                     <a href="{{ route('peserta.pendaftaran.edit', $participant->id) }}"
                         class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 font-semibold shadow-sm">

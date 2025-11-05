@@ -1,5 +1,5 @@
 <!-- Alert -->
-@foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
+@foreach (['success' => 'green', 'failed' => 'yellow', 'error' => 'red'] as $type => $color)
     @if (session($type))
         <div id="{{ $type }}Alert"
             class="fixed top-20 right-4 bg-{{ $color }}-500 text-white px-5 py-4 rounded-lg shadow-lg flex items-center gap-3 z-50">
@@ -17,7 +17,7 @@
 
 <script>
     setTimeout(() => {
-        ['successAlert', 'errorAlert'].forEach(id => {
+        ['successAlert', 'failedAlert', 'errorAlert'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.style.transition = 'opacity 0.5s';

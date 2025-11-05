@@ -20,10 +20,23 @@
                     </p>
                 </div>
             </div>
-            <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
-                class="mt-4 sm:mt-0 inline-block bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded-lg font-semibold transition text-center">
-                Daftar Sekarang
-            </a>
+
+            @php
+                $now = now();
+                $isRegistrationOpen =
+                    $competition->competition &&
+                    $now->between(
+                        $competition->competition->registration_start_date,
+                        $competition->competition->registration_end_date,
+                    );
+            @endphp
+
+            @if ($isRegistrationOpen)
+                <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
+                    class="mt-4 sm:mt-0 inline-block bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded-lg font-semibold transition text-center">
+                    Daftar Sekarang
+                </a>
+            @endif
         </div>
 
         <div class="grid sm:grid-cols-3 gap-4 mb-8 text-sm text-gray-700">
@@ -38,16 +51,46 @@
                 <p class="font-semibold text-gray-800">Jumlah Peserta Terdaftar</p>
                 <p class="text-gray-600">{{ $competition->participants_count }} Peserta</p>
             </div>
+            <!-- Status Badge -->
+            @php
+                $now = now();
+                $isOpen = $now->between($competition->registration_start_date, $competition->registration_end_date);
+                $isComing = $now->lt($competition->registration_start_date);
+                $isClosed = $now->gt($competition->registration_end_date);
+            @endphp
+
             <div class="bg-gray-50 p-4 rounded-lg border">
                 <p class="font-semibold text-gray-800">Status</p>
-                <span @class([
+                <div class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold">
+                    @if ($isOpen)
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                            Pendaftaran Dibuka
+                        </span>
+                    @elseif ($isComing)
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                            <i class="uil uil-clock-three mr-1"></i>
+                            Akan Dibuka
+                        </span>
+                    @elseif ($isClosed)
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                            <i class="uil uil-lock mr-1"></i>
+                            Pendaftaran Ditutup
+                        </span>
+                    @endif
+                </div>
+
+                {{-- <span @class([
                     'inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold',
                     'bg-green-100 text-green-800' => $competition->status === 'dibuka',
                     'bg-gray-200 text-gray-800' => $competition->status === 'ditutup',
                     'bg-yellow-100 text-yellow-800' => $competition->status === 'akan_datang',
                 ])>
                     {{ ucfirst(str_replace('_', ' ', $competition->status)) }}
-                </span>
+                </span> --}}
             </div>
         </div>
 

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Competition;
 use App\Models\Participant;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Exports\ParticipantsExport;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
@@ -104,6 +107,15 @@ class ParticipantsController extends Controller
      */
     public function destroy(Participant $participant)
     {
+        // Ambil data lomba terkait
+        $competition = $participant->competition;
+
+        // Cek apakah waktu kompetisi sudah berakhir
+        $now = now();
+        if ($now->gt($competition->registration_end_date)) {
+            return redirect()->back()->with('failed', 'Data peserta tidak dapat dihapus karena lomba sudah selesai.');
+        }
+
         try {
             // Hapus file bukti bayar jika ada
             if ($participant->bukti_bayar) {
@@ -120,6 +132,15 @@ class ParticipantsController extends Controller
 
     public function editPeserta(Participant $participant)
     {
+        // Ambil data lomba terkait
+        $competition = $participant->competition;
+
+        // Cek apakah waktu kompetisi sudah berakhir
+        $now = now();
+        if ($now->gt($competition->registration_end_date)) {
+            return redirect()->back()->with('failed', 'Data peserta tidak dapat diubah karena lomba sudah selesai.');
+        }
+
         $categories = [
             'USIA DINI 1 (SD)',
             'USIA DINI 2 (SD)',
@@ -249,14 +270,38 @@ class ParticipantsController extends Controller
     public function create($competition_id)
     {
         $competition = Competition::findOrFail($competition_id);
+
+        // 🔒 Pembatasan waktu pendaftaran
+        $now = Carbon::now();
+
+        if ($now->lt($competition->registration_start_date)) {
+            return redirect()->back()->with('failed', 'Pendaftaran belum dibuka.');
+        }
+
+        if ($now->gt($competition->registration_end_date)) {
+            return redirect()->back()->with('failed', 'Pendaftaran sudah ditutup.');
+        }
+
         return view('pages.peserta.lomba.daftar', compact('competition'));
     }
 
-    // Menyimpan data peserta baru
+    // Simpan data pendaftaran
     public function store(Request $request)
     {
-        // 1. Validasi Input
-        $request->validate([
+        $competition = Competition::findOrFail($request->competition_id);
+        $now = Carbon::now();
+
+        // 🔒 Pembatasan waktu
+        if ($now->lt($competition->registration_start_date)) {
+            return back()->with('failed', 'Pendaftaran belum dibuka.');
+        }
+
+        if ($now->gt($competition->registration_end_date)) {
+            return back()->with('failed', 'Pendaftaran sudah ditutup.');
+        }
+
+        // ✅ 1. Validasi Input
+        $validated = $request->validate([
             'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
@@ -264,69 +309,78 @@ class ParticipantsController extends Controller
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:L,P',
             'nik' => [
-            'required',
-            'digits:16',
-            // NIK harus unik untuk setiap kompetisi
-            Rule::unique('participants')->where(function ($query) use ($request) {
-                return $query->where('competition_id', $request->competition_id);
-            }),
+                'required',
+                'digits:16',
+                Rule::unique('participants')->where(function ($query) use ($request) {
+                    return $query->where('competition_id', $request->competition_id);
+                }),
             ],
             'category' => 'required|string|max:255',
             'body_weight' => 'required|numeric|min:20|max:120',
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'note' => 'nullable|string',
+            'note' => 'nullable|string|max:1000',
         ], [
-            // Pesan error kustom:
             'nik.unique' => 'NIK ini sudah terdaftar pada kompetisi ini.',
             'nik.digits' => 'NIK harus berjumlah 16 digit.',
             'bukti_bayar.image' => 'File bukti bayar harus berupa gambar (jpg, jpeg, png).',
         ]);
 
         try {
-            // 2. Tentukan Kelas Tanding berdasarkan Berat Badan
+            // ✅ 2. Cek apakah ada input mencurigakan (mengandung tag HTML)
+            foreach ($validated as $key => $value) {
+                if (is_string($value) && preg_match('/<[^>]*>/', $value)) {
+                    return back()
+                        ->withInput()
+                        ->withErrors([
+                            $key => 'Input pada kolom "' . str_replace('_', ' ', $key) . '" mengandung karakter tidak valid.'
+                        ])
+                        ->with('failed', 'Input tidak valid: harap hapus tanda < atau > dari form.');
+                }
+            }
+
+            // ✅ 3. Tentukan Kelas Tanding
             $weightClass = $this->getWeightClass(
                 $request->category,
                 $request->gender,
                 $request->body_weight
             );
 
-            // 3. Handle Jika Berat Badan Tidak Masuk Kategori Manapun
             if (!$weightClass) {
                 return back()->withInput()->withErrors([
                     'body_weight' => 'Berat badan tidak sesuai dengan kategori usia yang dipilih.'
                 ]);
             }
 
-            // 4. Proses Upload File Bukti Bayar
+            // ✅ 4. Upload File (jika ada)
             $path = null;
             if ($request->hasFile('bukti_bayar')) {
                 $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
             }
 
-            // 5. Simpan Data ke Database
+            // ✅ 5. Simpan ke Database (jika aman semua)
             Participant::create([
-                'user_id' => auth()->id(),
-                'competition_id' => $request->competition_id,
-                'kontingen' => $request->kontingen,
-                'full_name' => $request->full_name,
-                'place_of_birth' => $request->place_of_birth,
-                'date_of_birth' => $request->date_of_birth,
-                'gender' => $request->gender,
-                'nik' => $request->nik,
-                'category' => $request->category,
-                'body_weight' => $request->body_weight,
-                'weight_class' => $weightClass,
-                'phone_number' => $request->phone_number,
-                'bukti_bayar' => $path,
-                'note' => $request->note,
+                'user_id'        => Auth::id(),
+                'competition_id' => $validated['competition_id'],
+                'kontingen'      => $validated['kontingen'] ?? null,
+                'full_name'      => $validated['full_name'],
+                'place_of_birth' => $validated['place_of_birth'],
+                'date_of_birth'  => $validated['date_of_birth'],
+                'gender'         => $validated['gender'],
+                'nik'            => $validated['nik'],
+                'category'       => $validated['category'],
+                'body_weight'    => $validated['body_weight'],
+                'weight_class'   => $weightClass,
+                'phone_number'   => $validated['phone_number'],
+                'bukti_bayar'    => $path,
+                'note'           => $validated['note'] ?? null,
             ]);
 
             return redirect()->route('peserta.pendaftaran.index')
                 ->with('success', 'Pendaftaran peserta berhasil disimpan.');
         } catch (\Exception $e) {
-            // Jika terjadi error lain, kembalikan ke halaman sebelumnya dengan pesan error
-            return back()->with('failed', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            report($e);
+            return back()->with('failed', 'Terjadi kesalahan sistem. Silakan coba lagi nanti.');
         }
     }
 
@@ -413,20 +467,48 @@ class ParticipantsController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk mengedit peserta ini.');
         }
 
+        // Ambil data kompetisi terkait
+        $competition = Competition::findOrFail($participant->competition_id);
+
+        // 🔒 Pembatasan waktu (berdasarkan status lomba atau waktu)
+        if ($competition->status !== 'dibuka') {
+            return redirect()->back()->with('failed', 'Pendaftaran untuk lomba ini sudah ditutup.');
+        }
+
+        // Jika ingin tambahan pembatasan waktu (opsional)
+        if ($competition->registration_end_date && now()->greaterThan($competition->registration_end_date)) {
+            return redirect()->back()->with('failed', 'Waktu pendaftaran untuk lomba ini telah berakhir.');
+        }
+
         $competitions = Competition::where('status', 'dibuka')->get();
 
         return view('pages.peserta.lomba.peserta-edit', compact('participant', 'competitions'));
     }
 
+    // update data pendaftaran oleh peserta itu sendiri
     public function update(Request $request, Participant $participant)
     {
         if ($participant->user_id !== auth()->id()) {
             abort(403);
         }
 
-        // 1. Validasi Input (diubah ke 'body_weight')
+        // Ambil data kompetisi
+        $competition = Competition::findOrFail($participant->competition_id);
+
+        // 🔒 Cek status lomba
+        if ($competition->status !== 'dibuka') {
+            return redirect()->route('peserta.pendaftaran.index')
+                ->with('failed', 'Lomba ini sudah ditutup, data tidak dapat diubah.');
+        }
+
+        // 🔒 Cek batas waktu pendaftaran
+        if ($competition->registration_end_date && now()->greaterThan($competition->registration_end_date)) {
+            return redirect()->route('peserta.pendaftaran.index')
+                ->with('failed', 'Waktu pendaftaran telah berakhir, data tidak dapat diubah.');
+        }
+
+        // ✅ Validasi input normal
         $request->validate([
-            // 'competition_id' => 'required|exists:competitions,id',
             'kontingen' => 'nullable|string|max:255',
             'full_name' => 'required|string|max:255',
             'place_of_birth' => 'required|string|max:255',
@@ -436,11 +518,11 @@ class ParticipantsController extends Controller
                 'required',
                 'digits:16',
                 Rule::unique('participants')
-                    ->where(fn($query) => $query->where('competition_id', $request->competition_id))
+                    ->where(fn($query) => $query->where('competition_id', $participant->competition_id))
                     ->ignore($participant->id),
             ],
             'category' => 'required|string|max:255',
-            'body_weight' => 'required|numeric|min:20|max:120', // <-- DIUBAH
+            'body_weight' => 'required|numeric|min:20|max:120',
             'phone_number' => 'required|string|max:15',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'note' => 'nullable|string',
@@ -448,46 +530,110 @@ class ParticipantsController extends Controller
             'nik.unique' => 'NIK ini sudah terdaftar pada lomba yang sama.',
         ]);
 
-        // 2. Tentukan Ulang Kelas Tanding
-        $weightClass = $this->getWeightClass(
-            $request->category,
-            $request->gender,
-            $request->body_weight
-        );
+        // ✅ Validasi tambahan: Deteksi input tidak wajar (anti-XSS)
+        $fieldsToCheck = [
+            'kontingen',
+            'full_name',
+            'place_of_birth',
+            'category',
+            'phone_number',
+            'note'
+        ];
 
-        // 3. Handle Jika Berat Badan Tidak Masuk Kategori
-        if (!$weightClass) {
-            return back()->withInput()->withErrors([
-                'body_weight' => 'Berat badan tidak sesuai dengan kategori usia yang dipilih.'
-            ]);
+        foreach ($fieldsToCheck as $field) {
+            $value = $request->input($field);
+            if ($value && preg_match('/<[^>]*script|onerror|onload|<[^>]+>/i', $value)) {
+                return back()
+                    ->withInput()
+                    ->with('failed', 'Input tidak valid terdeteksi pada kolom "' . $field . '". Harap masukkan data yang wajar tanpa tag HTML.');
+            }
         }
 
-        // 4. Proses Upload File (Logika Anda sudah benar)
-        $path = $participant->bukti_bayar;
-        if ($request->hasFile('bukti_bayar')) {
+        try {
+            // ✅ Tentukan ulang kelas tanding
+            $weightClass = $this->getWeightClass(
+                $request->category,
+                $request->gender,
+                $request->body_weight
+            );
+
+            if (!$weightClass) {
+                return back()->withInput()->withErrors([
+                    'body_weight' => 'Berat badan tidak sesuai dengan kategori usia yang dipilih.'
+                ]);
+            }
+
+            // ✅ Proses upload file baru jika ada
+            $path = $participant->bukti_bayar;
+            if ($request->hasFile('bukti_bayar')) {
+                if ($participant->bukti_bayar) {
+                    Storage::disk('public')->delete($participant->bukti_bayar);
+                }
+                $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
+            }
+
+            // ✅ Update data peserta
+            $participant->update([
+                'kontingen' => $request->kontingen,
+                'full_name' => $request->full_name,
+                'place_of_birth' => $request->place_of_birth,
+                'date_of_birth' => $request->date_of_birth,
+                'gender' => $request->gender,
+                'nik' => $request->nik,
+                'category' => $request->category,
+                'body_weight' => $request->body_weight,
+                'weight_class' => $weightClass,
+                'phone_number' => $request->phone_number,
+                'bukti_bayar' => $path,
+                'note' => $request->note,
+            ]);
+
+            return redirect()->route('peserta.pendaftaran.index')
+                ->with('success', 'Data peserta berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Simpan detail error ke log untuk developer
+            Log::error('Update peserta gagal: ' . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'participant_id' => $participant->id ?? null,
+            ]);
+            
+            return back()->with('failed', 'Terjadi kesalahan sistem. Silakan coba lagi nanti.');
+        }
+    }
+
+    // hapus pendaftaran peserta oleh peserta itu sendiri
+    public function participantDestroy(Participant $participant)
+    {
+        try {
+            // Pastikan hanya user yang mendaftarkan bisa menghapus datanya
+            if ($participant->user_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki izin untuk menghapus peserta ini.');
+            }
+
+            // Ambil data lomba terkait
+            $competition = $participant->competition;
+
+            // Jika kompetisi tidak ditemukan
+            if (!$competition) {
+                return redirect()->back()->with('error', 'Data lomba tidak ditemukan.');
+            }
+
+            // Cek apakah waktu kompetisi sudah berakhir
+            if ($competition->registration_end_date && now()->greaterThan($competition->registration_end_date)) {
+                return redirect()->back()->with('failed', 'Waktu pendaftaran telah berakhir, data tidak dapat dihapus.');
+            }
+
+            // Hapus file bukti bayar jika ada
             if ($participant->bukti_bayar) {
                 Storage::disk('public')->delete($participant->bukti_bayar);
             }
-            $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
+
+            // Hapus data peserta
+            $participant->delete();
+
+            return redirect()->back()->with('success', 'Data peserta telah dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
-
-        // 5. Update Data ke Database
-        $participant->update([
-            // 'competition_id' => $request->competition_id,
-            'kontingen' => $request->kontingen,
-            'full_name' => $request->full_name,
-            'place_of_birth' => $request->place_of_birth,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-            'nik' => $request->nik,
-            'category' => $request->category,
-            'body_weight' => $request->body_weight,
-            'weight_class' => $weightClass,
-            'phone_number' => $request->phone_number,
-            'bukti_bayar' => $path,
-            'note' => $request->note,
-        ]);
-
-        return redirect()->route('peserta.pendaftaran.index')->with('success', 'Data peserta berhasil diperbarui.');
     }
 }
