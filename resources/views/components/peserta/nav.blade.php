@@ -3,18 +3,7 @@
         <div class="flex justify-between items-center h-16">
             <a href="{{ route('peserta.dashboard') }}">
                 <div class="flex items-center">
-                    <div class="h-8 w-8 mt-2 text-red-900">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                            <path d="M4 22h16" />
-                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                        </svg>
-                    </div>
+                    <img src="{{ asset('logo.png') }}" alt="Logo" class="h-8 w-8">
                     <span class="ml-2 text-xl font-bold text-red-900">Dashboard Peserta</span>
                 </div>
             </a>
@@ -38,7 +27,16 @@
                         {{ strtoupper(substr(Auth::user()->name ?? 'Peserta test', 0, 1)) }}</div>
                     <span class="hidden md:block">{{ Auth::user()->name ?? 'Peserta test' }}</span>
                 </div>
-                <a href="/logout" data-view="landing" class="nav-btn text-gray-600 hover:text-red-900">
+                
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                    @csrf
+                </form>
+
+                <a href="#" class="nav-btn text-gray-600 hover:text-red-900"
+                    onclick="event.preventDefault(); 
+                    if (confirm('Apakah Anda yakin ingin logout?')) { 
+                    document.getElementById('logout-form').submit(); 
+                    }">
                     <span class="h-5 w-5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -48,7 +46,20 @@
                             <line x1="21" y1="12" x2="9" y2="12" />
                         </svg>
                     </span>
+                    {{-- Logout --}}
                 </a>
+
+                {{-- <a href="/logout" data-view="landing" class="nav-btn text-gray-600 hover:text-red-900">
+                    <span class="h-5 w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </span>
+                </a> --}}
             </div>
         </div>
     </div>

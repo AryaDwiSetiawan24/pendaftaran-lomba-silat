@@ -7,6 +7,7 @@
     <title>Register - Sistem Penilaian Lomba Silat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.2.0/css/line.css">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -53,6 +54,9 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-orange-900 silat-pattern">
+    {{-- alert --}}
+    <x-alert />
+
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
         <div
@@ -68,9 +72,8 @@
         <div class="w-full max-w-md">
             <!-- Logo & Title -->
             <div class="text-center mb-8 fade-in">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl mb-4 shadow-2xl">
-                    <span class="text-3xl">🥋</span>
+                <div class="inline-flex items-center w-20 h-20 mb-4">
+                    <img src="{{ asset('logo.png') }}" alt="Logo">
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Pendaftaran Lomba Silat</h1>
                 <p class="text-blue-200 text-sm mt-2">Register untuk mengakses sistem pendaftaran lomba silat</p>
@@ -88,6 +91,18 @@
                             @endforeach
                         </ul>
                     </div>
+                @endif
+
+                {{-- ⚠️ Alert khusus jika password tidak cocok --}}
+                @if ($errors->has('password'))
+                    @foreach ($errors->get('password') as $message)
+                        @if (Str::contains($message, 'confirmation'))
+                            <div
+                                class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded-lg mb-4">
+                                ⚠️ Konfirmasi password tidak sama. Pastikan kedua kolom password identik.
+                            </div>
+                        @endif
+                    @endforeach
                 @endif
 
                 <form action="{{ route('register') }}" method="POST" class="space-y-6 text-white">

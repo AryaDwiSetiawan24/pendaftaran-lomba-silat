@@ -39,18 +39,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <a href="#home" class="flex items-center">
-                        <div class="h-8 w-8 text-yellow-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                                <path d="M4 22h16" />
-                                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                            </svg>
-                        </div>
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="h-8 w-8">
                         <span class="ml-2 text-lg sm:text-xl font-bold text-white">Lomba Silat Demak</span>
                     </a>
 
@@ -161,7 +150,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
                     <div>
                         <div class="flex items-center mb-4">
-                            <div class="h-8 w-8 text-yellow-400">
+                            {{-- <div class="h-8 w-8 text-yellow-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -172,7 +161,8 @@
                                     <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
                                     <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
                                 </svg>
-                            </div>
+                            </div> --}}
+                            <img src="{{ asset('logo.png') }}" alt="Logo" class="h-8 w-8">
                             <span class="ml-2 text-lg sm:text-xl font-bold text-white">Lomba Silat Demak</span>
                         </div>
                         <p class="text-gray-300 text-sm leading-relaxed">
@@ -203,7 +193,7 @@
                             </a>
                             <p class="text-gray-300 text-sm flex items-start">
                                 <i class="uil uil-map-marker mr-2 mt-1 flex-shrink-0"></i>
-                                <span>Demak, Jawa Tengah<br>Indonesia</span>
+                                <span>Demak, Jawa Tengah, Indonesia</span>
                             </p>
                         </div>
                     </div>

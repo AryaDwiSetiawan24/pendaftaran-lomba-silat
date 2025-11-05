@@ -128,7 +128,7 @@
             </div>
 
             <!-- Payment Proof -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {{-- <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4">
                     <h2 class="text-lg font-semibold text-white flex items-center">
                         <i class="uil uil-receipt mr-2"></i>
@@ -160,7 +160,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <!-- Sidebar Actions -->

@@ -24,6 +24,10 @@
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
         <div class="flex items-start gap-4">
             <div class="flex-1">
+                @if ($competition->competition_logo)
+                    <img src="{{ asset('storage/' . $competition->competition_logo) }}"
+                        alt="Logo {{ $competition->name }}" class="h-8 w-8 rounded object-cover">
+                @endif
                 <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ $competition->name }}</h2>
                 <p class="text-gray-600 mb-3">{{ $competition->description }}</p>
                 <div class="flex items-center gap-4 text-sm">

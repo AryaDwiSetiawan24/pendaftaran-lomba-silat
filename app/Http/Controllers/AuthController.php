@@ -15,31 +15,72 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email|max:50',
-            'password' => 'required|max:50',
+            'password' => 'required|string|max:50',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->remember)) {
-            if (Auth::user()->role === 'admin') {
+        // Bersihkan input dari tag HTML dan spasi berlebih
+        $cleanEmail = trim(strip_tags($request->email));
+        $cleanPassword = trim(strip_tags($request->password));
+
+        // Cegah input XSS — jika hasil strip_tags berbeda dari input asli
+        if ($cleanEmail !== $request->email || $cleanPassword !== $request->password) {
+            return back()
+                ->withInput()
+                ->with('failed', 'Input mengandung karakter tidak diperbolehkan. Mohon periksa kembali.');
+        }
+
+        // Autentikasi user
+        if (Auth::attempt(['email' => $cleanEmail, 'password' => $cleanPassword], $request->remember)) {
+            $user = Auth::user();
+
+            // Redirect sesuai role
+            if ($user->role === 'admin') {
                 return redirect('/admin')->with('success', 'Login berhasil!');
             }
+
             return redirect('/peserta')->with('success', 'Login berhasil!');
         }
-        return back()->with('failed', 'email atau password salah!');
+
+        return back()->with('failed', 'Email atau password salah!');
     }
 
-    function register(Request $request)
+
+    public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|max:50',
+            'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email|max:50',
-            'password' => 'required|confirmed|max:50|min:6',
+            'password' => 'required|confirmed|string|min:6|max:50',
+        ], [
+            'password.confirmed' => 'Konfirmasi password tidak sama. Pastikan kedua kolom password identik.',
         ]);
 
-        $request['status'] = 'verify';
-        $user = User::create($request->all());
+        // Bersihkan input
+        $cleanName = trim(strip_tags($request->name));
+        $cleanEmail = trim(strip_tags($request->email));
+
+        // 🚫 Cek apakah input mengandung tag HTML
+        if ($cleanName !== $request->name || $cleanEmail !== $request->email) {
+            return back()
+                ->withInput()
+                ->with('failed', 'Input mengandung karakter tidak diperbolehkan. Mohon periksa kembali.');
+        }
+
+        // Simpan user baru
+        $user = User::create([
+            'name' => $cleanName,
+            'email' => $cleanEmail,
+            'password' => bcrypt($request->password),
+            'status' => 'verify',
+        ]);
+
         Auth::login($user);
-        return redirect('/peserta')->with('success', 'Register berhasil! Selamat datang ' . $user->name . '.');
+
+        return redirect('/peserta')
+            ->with('success', 'Register berhasil! Selamat datang ' . e($user->name) . '.');
     }
+
+
 
     // Redirect ke Google
     public function googleRedirect()
@@ -90,9 +131,14 @@ class AuthController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
+
+        // Hapus sesi dan regenerasi untuk keamanan tambahan
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return redirect('/')->with('success', 'Logout berhasil!');
     }
 }
