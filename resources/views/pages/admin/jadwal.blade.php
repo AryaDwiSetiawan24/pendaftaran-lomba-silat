@@ -142,7 +142,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Tidak Ada Lomba</h3>
                     <p class="text-gray-600 mb-6">Belum ada lomba yang tersedia untuk saat ini.</p>
-                    <a href="{{ route('admin.lomba.create') }}"
+                    <a href="{{ route('admin.add-lomba') }}"
                         class="inline-flex items-center px-6 py-3 bg-red-900 hover:bg-red-800 text-white rounded-lg transition font-semibold">
                         <i class="uil uil-plus mr-2"></i>
                         Tambah Lomba Baru
