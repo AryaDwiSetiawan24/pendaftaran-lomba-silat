@@ -80,8 +80,6 @@ class AuthController extends Controller
             ->with('success', 'Register berhasil! Selamat datang ' . e($user->name) . '.');
     }
 
-
-
     // Redirect ke Google
     public function googleRedirect()
     {
