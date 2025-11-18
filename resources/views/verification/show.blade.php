@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Penilaian Lomba Silat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -111,14 +112,14 @@
                     </button>
 
                     <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between">
+                    {{-- <div class="flex items-center justify-between">
                         <div class="flex items-center">
                         <div class="flex flex-col items-end text-end space-y-1">
                             <a href="#!" class="text-sm text-blue-200 hover:text-white transition-colors duration-200">
                                 Kirim ulang email verifikasi
                             </a>
                         </div>
-                    </div>
+                    </div> --}}
                 </form>
 
                 <!-- Footer -->

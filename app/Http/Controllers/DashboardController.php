@@ -12,6 +12,7 @@ class DashboardController extends Controller
     public function index()
     {
         $competitions = Competition::where('status', 'dibuka')
+            ->withCount('participants')
             ->orderBy('competition_date', 'asc')
             ->get();
         return view('layouts.guest', compact('competitions'));

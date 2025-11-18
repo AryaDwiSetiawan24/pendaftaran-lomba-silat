@@ -120,7 +120,7 @@
                                                 class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-xs font-medium shadow-sm">
                                                 Edit
                                             </a>
-                                            
+
                                             {{-- Hapus --}}
                                             <form action="{{ route('peserta.pendaftaran.destroy', $p->id) }}"
                                                 method="POST"
@@ -169,6 +169,15 @@
                                 class="flex-1 text-center px-3 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold">
                                 Edit
                             </a>
+                            <form action="{{ route('peserta.pendaftaran.destroy', $p->id) }}" method="POST"
+                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="flex-1 text-center px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+                                    Hapus
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
