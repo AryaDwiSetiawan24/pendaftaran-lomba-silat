@@ -116,7 +116,7 @@
                                     <div class="flex items-start text-sm text-gray-700">
                                         <i class="uil uil-calendar text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
                                         <span class="font-medium">
-                                            {{ $competition->competition_date ? $competition->competition_date->format('d M Y, H:i') : 'Belum dijadwalkan' }}
+                                            {{ $competition->competition_date ? $competition->competition_date->format('d M Y') : 'Belum dijadwalkan' }}
                                         </span>
                                     </div>
                                     <div class="flex items-start text-sm text-gray-600">
