@@ -21,22 +21,10 @@
                 </div>
             </div>
 
-            @php
-                $now = now();
-                $isRegistrationOpen =
-                    $competition->competition &&
-                    $now->between(
-                        $competition->competition->registration_start_date,
-                        $competition->competition->registration_end_date,
-                    );
-            @endphp
-
-            @if ($isRegistrationOpen)
-                <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
-                    class="mt-4 sm:mt-0 inline-block bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded-lg font-semibold transition text-center">
-                    Daftar Sekarang
-                </a>
-            @endif
+            <a href="{{ route('peserta.lomba.daftar', $competition->id) }}"
+                class="mt-4 sm:mt-0 inline-block bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded-lg font-semibold transition text-center">
+                Daftar Sekarang
+            </a>
         </div>
 
         <div class="grid sm:grid-cols-3 gap-4 mb-8 text-sm text-gray-700">
