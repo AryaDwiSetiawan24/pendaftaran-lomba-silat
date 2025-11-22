@@ -39,6 +39,7 @@ class Participant extends Model
      * @var array
      */
     protected $casts = [
+        'user_id' => 'integer',
         'date_of_birth' => 'date',
     ];
 
