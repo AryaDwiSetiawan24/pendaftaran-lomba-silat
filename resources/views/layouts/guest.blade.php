@@ -101,6 +101,10 @@
                         class="px-6 sm:px-8 py-3 sm:py-4 bg-yellow-400 text-red-900 rounded-lg font-bold text-base sm:text-lg hover:bg-yellow-300 transition transform hover:scale-105">
                         Daftar Lomba Sekarang
                     </a>
+                    <a href="https://drive.google.com/drive/folders/1SZNLG6jErIsF_EETvj6ZiHOl4Z25eWL3?usp=sharing" target="blank"
+                        class="px-6 sm:px-8 py-3 sm:py-4 text-white border border-white rounded-lg font-bold text-base sm:text-lg hover:bg-white hover:text-red-900 transition transform hover:scale-105">
+                        Cara Daftar
+                    </a>
                 </div>
             </div>
         </div>
