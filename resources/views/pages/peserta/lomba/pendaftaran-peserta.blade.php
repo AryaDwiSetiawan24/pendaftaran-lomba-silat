@@ -142,13 +142,31 @@
             </div>
 
             <!-- Mobile -->
-            <div class="sm:hidden divide-y divide-gray-200">
+            <div class="sm:hidden divide-y divide-gray-200 bg-white rounded-lg shadow">
                 @foreach ($participants as $p)
                     <div class="p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-lg font-semibold text-gray-800">{{ $p->full_name }}</h3>
+                        <!-- Header dengan Nama dan Status -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="text-base font-bold text-gray-900 mb-1">
+                                    {{ $p->full_name }}
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    @if ($p->gender == 'L')
+                                        <span
+                                            class="inline-flex items-center text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                            <i class="uil uil-mars mr-1"></i> Laki-laki
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center text-xs font-medium text-pink-600 bg-pink-50 px-2 py-0.5 rounded">
+                                            <i class="uil uil-venus mr-1"></i> Perempuan
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
                             <span
-                                class="text-xs px-2 py-1 rounded-full {{ $p->validation_status === 'approved'
+                                class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ml-2 {{ $p->validation_status === 'approved'
                                     ? 'bg-green-100 text-green-700'
                                     : ($p->validation_status === 'pending'
                                         ? 'bg-yellow-100 text-yellow-700'
@@ -156,26 +174,43 @@
                                 {{ ucfirst($p->validation_status) }}
                             </span>
                         </div>
-                        <p class="text-gray-600 text-sm"><strong>Kontingen:</strong> {{ $p->kontingen ?? '-' }}</p>
-                        <p class="text-gray-600 text-sm"><strong>Lomba:</strong> {{ $p->competition->name }}</p>
-                        <p class="text-gray-600 text-sm"><strong>Kategori:</strong> {{ $p->category }}</p>
 
-                        <div class="mt-3 flex gap-2">
+                        <!-- Info Cards -->
+                        <div class="space-y-2 mb-4">
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Kontingen</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->kontingen ?? '-' }}</p>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Lomba</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->competition->name }}</p>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Kategori</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->category }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
                             <a href="{{ route('peserta.pendaftaran.show', $p->id) }}"
-                                class="flex-1 text-center px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold">
-                                Detail
+                                class="flex-1 text-center px-3 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors">
+                                <i class="uil uil-eye"></i> Detail
                             </a>
                             <a href="{{ route('peserta.pendaftaran.edit', $p->id) }}"
-                                class="flex-1 text-center px-3 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold">
-                                Edit
+                                class="flex-1 text-center px-3 py-2.5 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold transition-colors">
+                                <i class="uil uil-edit"></i> Edit
                             </a>
                             <form action="{{ route('peserta.pendaftaran.destroy', $p->id) }}" method="POST"
-                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');">
+                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');"
+                                class="flex-1">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="flex-1 text-center px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
-                                    Hapus
+                                    class="w-full text-center px-3 py-2.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors">
+                                    <i class="uil uil-trash"></i> Hapus
                                 </button>
                             </form>
                         </div>

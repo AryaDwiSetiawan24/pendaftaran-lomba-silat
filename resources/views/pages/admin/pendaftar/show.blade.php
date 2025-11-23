@@ -35,6 +35,10 @@
                             <p class="text-gray-800 font-semibold mt-1">{{ $participant->full_name }}</p>
                         </div>
                         <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Kontingen</label>
+                            <p class="text-gray-800 font-semibold mt-1">{{ $participant->kontingen }}</p>
+                        </div>
+                        <div>
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">NIK</label>
                             <p class="text-gray-800 font-semibold mt-1">{{ $participant->nik }}</p>
                         </div>
@@ -189,11 +193,11 @@
                     <div class="space-y-2 text-sm text-gray-600">
                         <div class="flex items-center">
                             <i class="uil uil-calendar-alt mr-2 text-gray-400"></i>
-                            <span>Terdaftar: {{ $participant->created_at->format('d M Y') }}</span>
+                            <span>Terdaftar: {{ $participant->created_at->format('d M Y H:i:s') }}</span>
                         </div>
                         <div class="flex items-center">
                             <i class="uil uil-clock mr-2 text-gray-400"></i>
-                            <span>Update: {{ $participant->updated_at->format('d M Y') }}</span>
+                            <span>Update: {{ $participant->updated_at->format('d M Y H:i:s') }}</span>
                         </div>
                     </div>
                 </div>

@@ -154,7 +154,7 @@
                         Kembali
                     </a>
                     <a href="{{ route('peserta.pendaftaran.edit', $participant->id) }}"
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 font-semibold shadow-sm">
+                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-150 font-semibold shadow-sm">
                         <i class="uil uil-edit"></i>
                         Edit Data
                     </a>
