@@ -58,8 +58,8 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kontingen</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Lomba</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat
-                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Jenis Kelamin</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
@@ -84,6 +84,9 @@
                                     <span class="font-medium text-gray-800">
                                         {{ $p->body_weight ? $p->body_weight . ' kg' : '-' }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ $p->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                 </td>
                                 <td class="px-6 py-4">
                                     @php

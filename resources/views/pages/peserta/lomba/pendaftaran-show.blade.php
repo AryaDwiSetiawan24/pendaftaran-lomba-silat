@@ -77,7 +77,7 @@
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Jenis
                                 Kelamin</label>
                             <p class="text-gray-900 font-semibold">
-                                {{ $participant->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}</p>
+                                {{ $participant->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
                         </div>
                         <div class="space-y-1">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Tanggal
