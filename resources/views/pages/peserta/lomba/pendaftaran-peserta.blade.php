@@ -58,8 +58,10 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kontingen</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Lomba</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Jenis Kelamin</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Jenis Kelamin
+                            </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
@@ -89,17 +91,25 @@
                                     {{ $p->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    @php
-                                        $statusConfig = [
-                                            'pending' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
-                                            'approved' => 'bg-green-50 text-green-700 border-green-200',
-                                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
-                                        ];
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig[$p->validation_status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
-                                        {{ ucfirst($p->validation_status) }}
-                                    </span>
+                                    @if ($p->validation_status == 'approved')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-semibold">
+                                            <i class="uil uil-check-circle mr-1"></i>
+                                            Disetujui
+                                        </span>
+                                    @elseif ($p->validation_status == 'rejected')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 font-semibold">
+                                            <i class="uil uil-times-circle mr-1"></i>
+                                            Ditolak
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 font-semibold">
+                                            <i class="uil uil-clock mr-1"></i>
+                                            Pending
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
@@ -168,14 +178,26 @@
                                     @endif
                                 </div>
                             </div>
-                            <span
-                                class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ml-2 {{ $p->validation_status === 'approved'
-                                    ? 'bg-green-100 text-green-700'
-                                    : ($p->validation_status === 'pending'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : 'bg-red-100 text-red-700') }}">
-                                {{ ucfirst($p->validation_status) }}
-                            </span>
+                            
+                            @if ($p->validation_status == 'approved')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold">
+                                    <i class="uil uil-check-circle mr-1"></i>
+                                    Disetujui
+                                </span>
+                            @elseif ($p->validation_status == 'rejected')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold">
+                                    <i class="uil uil-times-circle mr-1"></i>
+                                    Ditolak
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-semibold">
+                                    <i class="uil uil-clock mr-1"></i>
+                                    Pending
+                                </span>
+                            @endif
                         </div>
 
                         <!-- Info Cards -->

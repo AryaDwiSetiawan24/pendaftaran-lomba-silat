@@ -7,8 +7,7 @@
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">
                     Selamat Datang, {{ Auth::user()->name }}!
                 </h1>
-                <p class="text-gray-200 text-sm sm:text-base">Kelola pendaftaran lomba dan pantau jadwal pertandingan
-                    Anda</p>
+                <p class="text-gray-200 text-sm sm:text-base">Kelola pendaftaran lomba dan pantau jadwal pertandingan Anda</p>
             </div>
             <div class="hidden sm:block">
                 <i class="uil uil-user-circle text-6xl text-white opacity-20"></i>
@@ -25,8 +24,8 @@
                     <i class="uil uil-users-alt text-2xl text-blue-600"></i>
                 </div>
             </div>
-            <p class="text-gray-500 text-xs sm:text-sm mb-1">Total Pendaftaran</p>
-            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $totalParticipants }}</p>
+            <p class="text-gray-500 text-xs sm:text-sm mb-1">Total Pendaftaran Saya</p>
+            <p class="text-2xl sm:text-4xl font-bold text-gray-800">{{ $totalMyParticipants }}</p>
         </div>
 
         <!-- Lomba Diikuti -->
@@ -113,6 +112,12 @@
                                     {{ $competition->name }}
                                 </h3>
                                 <div class="space-y-2">
+                                    <div class="flex items-start text-sm text-gray-700">
+                                        <i class="uil uil-users-alt text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
+                                        <span class="font-medium">
+                                            {{ $totalParticipants ?? 0 }} Peserta telah terdaftar
+                                        </span>
+                                    </div>
                                     <div class="flex items-start text-sm text-gray-700">
                                         <i class="uil uil-calendar text-red-900 mr-2 mt-0.5 flex-shrink-0"></i>
                                         <span class="font-medium">

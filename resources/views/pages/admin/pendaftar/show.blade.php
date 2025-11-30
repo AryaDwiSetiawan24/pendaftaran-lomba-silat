@@ -72,11 +72,30 @@
 
             <!-- Competition Information -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-700 to-purple-800 px-6 py-4">
+                <div class="flex items-center justify-between bg-gradient-to-r from-purple-700 to-purple-800 px-6 py-4">
                     <h2 class="text-lg font-semibold text-white flex items-center">
                         <i class="uil uil-trophy mr-2"></i>
                         Informasi Lomba
                     </h2>
+                    @if ($participant->validation_status == 'approved')
+                        <span
+                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-semibold">
+                            <i class="uil uil-check-circle mr-1"></i>
+                            Disetujui
+                        </span>
+                    @elseif ($participant->validation_status == 'rejected')
+                        <span
+                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 font-semibold">
+                            <i class="uil uil-times-circle mr-1"></i>
+                            Ditolak
+                        </span>
+                    @else
+                        <span
+                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 font-semibold">
+                            <i class="uil uil-clock mr-1"></i>
+                            Pending
+                        </span>
+                    @endif
                 </div>
                 <div class="p-6">
                     <div class="grid sm:grid-cols-2 gap-6">
@@ -103,28 +122,9 @@
                             </p>
                         </div>
                         <div>
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Status
-                                Validasi</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Berat Badan</label>
                             <p class="mt-1">
-                                @if ($participant->validation_status == 'approved')
-                                    <span
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-semibold">
-                                        <i class="uil uil-check-circle mr-1"></i>
-                                        Disetujui
-                                    </span>
-                                @elseif ($participant->validation_status == 'rejected')
-                                    <span
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 font-semibold">
-                                        <i class="uil uil-times-circle mr-1"></i>
-                                        Ditolak
-                                    </span>
-                                @else
-                                    <span
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 font-semibold">
-                                        <i class="uil uil-clock mr-1"></i>
-                                        Pending
-                                    </span>
-                                @endif
+                                {{ $participant->body_weight }} Kg
                             </p>
                         </div>
                     </div>

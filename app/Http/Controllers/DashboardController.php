@@ -56,12 +56,13 @@ class DashboardController extends Controller
 
         // 2️⃣ Hitung statistik peserta
         $totalParticipants = Participant::count();
+        $totalMyParticipants = (clone $myCompetitionsQuery)->count();
         $totalCompetitions = (clone $myCompetitionsQuery)
             ->distinct('competition_id')
             ->count('competition_id');
-        $pendingCount = Participant::where('validation_status', 'pending')->count();
-        $approvedCount = Participant::where('validation_status', 'approved')->count();
-        $rejectedCount = Participant::where('validation_status', 'rejected')->count();
+        $pendingCount = (clone $myCompetitionsQuery)->where('validation_status', 'pending')->count();
+        $approvedCount = (clone $myCompetitionsQuery)->where('validation_status', 'approved')->count();
+        $rejectedCount = (clone $myCompetitionsQuery)->where('validation_status', 'rejected')->count();
 
         // 3️⃣ Ambil daftar lomba yang masih dibuka
         $competitions = Competition::where('status', 'dibuka')
@@ -102,6 +103,7 @@ class DashboardController extends Controller
         return view('pages.peserta.dashboard', compact(
             'competitions',
             'totalParticipants',
+            'totalMyParticipants',
             'pendingCount',
             'approvedCount',
             'rejectedCount',
