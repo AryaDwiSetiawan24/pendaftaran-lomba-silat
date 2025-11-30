@@ -379,7 +379,7 @@ class ParticipantsController extends Controller
             return redirect()->route('peserta.pendaftaran.index')
                 ->with('success', 'Pendaftaran peserta berhasil disimpan.');
         } catch (\Exception $e) {
-            report($e);
+            // report($e);
             return back()->with('failed', 'Terjadi kesalahan sistem. Silakan coba lagi nanti.');
         }
     }
@@ -699,11 +699,11 @@ class ParticipantsController extends Controller
                 ->with('success', 'Data peserta berhasil diperbarui.');
         } catch (\Exception $e) {
             // Simpan detail error ke log untuk developer
-            Log::error('Update peserta gagal: ' . $e->getMessage(), [
-                'user_id' => auth()->id(),
-                'participant_id' => $participant->id ?? null,
-            ]);
-
+            // Log::error('Update peserta gagal: ' . $e->getMessage(), [
+            //     'user_id' => auth()->id(),
+            //     'participant_id' => $participant->id ?? null,
+            // ]);
+            
             return back()->with('failed', 'Terjadi kesalahan sistem. Silakan coba lagi nanti.');
         }
     }

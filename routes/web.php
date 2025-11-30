@@ -22,7 +22,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google/redirect', [AuthController::class, 'googleRedirect'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])->name('auth.google.callback');
 
-Route::get('/home', fn() => view('home'));
 
 // Check Status Route
 Route::group(['middleware' => ['auth', 'check_role:peserta']], function () {
