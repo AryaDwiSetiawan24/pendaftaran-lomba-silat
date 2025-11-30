@@ -60,6 +60,8 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kelas/Berat
                             </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Jenis Kelamin
+                            </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
@@ -86,17 +88,28 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @php
-                                        $statusConfig = [
-                                            'pending' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
-                                            'approved' => 'bg-green-50 text-green-700 border-green-200',
-                                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
-                                        ];
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig[$p->validation_status] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
-                                        {{ ucfirst($p->validation_status) }}
-                                    </span>
+                                    {{ $p->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if ($p->validation_status == 'approved')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-semibold">
+                                            <i class="uil uil-check-circle mr-1"></i>
+                                            Disetujui
+                                        </span>
+                                    @elseif ($p->validation_status == 'rejected')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 font-semibold">
+                                            <i class="uil uil-times-circle mr-1"></i>
+                                            Ditolak
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 font-semibold">
+                                            <i class="uil uil-clock mr-1"></i>
+                                            Pending
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
@@ -142,40 +155,87 @@
             </div>
 
             <!-- Mobile -->
-            <div class="sm:hidden divide-y divide-gray-200">
+            <div class="sm:hidden divide-y divide-gray-200 bg-white rounded-lg shadow">
                 @foreach ($participants as $p)
                     <div class="p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-lg font-semibold text-gray-800">{{ $p->full_name }}</h3>
-                            <span
-                                class="text-xs px-2 py-1 rounded-full {{ $p->validation_status === 'approved'
-                                    ? 'bg-green-100 text-green-700'
-                                    : ($p->validation_status === 'pending'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : 'bg-red-100 text-red-700') }}">
-                                {{ ucfirst($p->validation_status) }}
-                            </span>
+                        <!-- Header dengan Nama dan Status -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="text-base font-bold text-gray-900 mb-1">
+                                    {{ $p->full_name }}
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    @if ($p->gender == 'L')
+                                        <span
+                                            class="inline-flex items-center text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                            <i class="uil uil-mars mr-1"></i> Laki-laki
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center text-xs font-medium text-pink-600 bg-pink-50 px-2 py-0.5 rounded">
+                                            <i class="uil uil-venus mr-1"></i> Perempuan
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            @if ($p->validation_status == 'approved')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold">
+                                    <i class="uil uil-check-circle mr-1"></i>
+                                    Disetujui
+                                </span>
+                            @elseif ($p->validation_status == 'rejected')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold">
+                                    <i class="uil uil-times-circle mr-1"></i>
+                                    Ditolak
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-semibold">
+                                    <i class="uil uil-clock mr-1"></i>
+                                    Pending
+                                </span>
+                            @endif
                         </div>
-                        <p class="text-gray-600 text-sm"><strong>Kontingen:</strong> {{ $p->kontingen ?? '-' }}</p>
-                        <p class="text-gray-600 text-sm"><strong>Lomba:</strong> {{ $p->competition->name }}</p>
-                        <p class="text-gray-600 text-sm"><strong>Kategori:</strong> {{ $p->category }}</p>
 
-                        <div class="mt-3 flex gap-2">
+                        <!-- Info Cards -->
+                        <div class="space-y-2 mb-4">
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Kontingen</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->kontingen ?? '-' }}</p>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Lomba</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->competition->name }}</p>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-2.5">
+                                <p class="text-xs text-gray-500 mb-0.5">Kategori</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $p->category }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
                             <a href="{{ route('peserta.pendaftaran.show', $p->id) }}"
-                                class="flex-1 text-center px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-semibold">
-                                Detail
+                                class="flex-1 text-center px-3 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors">
+                                <i class="uil uil-eye"></i> Detail
                             </a>
                             <a href="{{ route('peserta.pendaftaran.edit', $p->id) }}"
-                                class="flex-1 text-center px-3 py-2 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold">
-                                Edit
+                                class="flex-1 text-center px-3 py-2.5 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold transition-colors">
+                                <i class="uil uil-edit"></i> Edit
                             </a>
                             <form action="{{ route('peserta.pendaftaran.destroy', $p->id) }}" method="POST"
-                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');">
+                                onsubmit="return confirm('Anda yakin ingin menghapus peserta ini? Tindakan ini tidak dapat dibatalkan.');"
+                                class="flex-1">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="flex-1 text-center px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
-                                    Hapus
+                                    class="w-full text-center px-3 py-2.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors">
+                                    <i class="uil uil-trash"></i> Hapus
                                 </button>
                             </form>
                         </div>
