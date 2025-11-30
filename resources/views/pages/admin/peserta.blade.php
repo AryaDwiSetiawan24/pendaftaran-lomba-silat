@@ -306,7 +306,13 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                                    {{ $p->full_name }}</p>
+                                    {{ $p->full_name }}
+                                @if ($p->gender == 'L')
+                                    <span class="text-blue-600"><i class="uil uil-mars"></i></span>
+                                @else
+                                    <span class="text-pink-600"><i class="uil uil-venus"></i></span>
+                                @endif
+                                </p>
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     <i class="uil uil-phone"></i> {{ $p->phone_number }}
                                 </p>
@@ -349,15 +355,12 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 mb-1">
-                                <i class="uil uil-user"></i> Jenis Kelamin
+                                <i class="uil uil-bag"></i> Kontingen
                             </p>
-                            <p class="text-xs sm:text-sm font-semibold">
-                                @if ($p->gender == 'L')
-                                    <span class="text-blue-600"><i class="uil uil-mars"></i> Laki-laki</span>
-                                @else
-                                    <span class="text-pink-600"><i class="uil uil-venus"></i> Perempuan</span>
-                                @endif
-                            </p>
+                            <span
+                                class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                {{ Str::limit($p->kontingen, 15) }}
+                            </span>
                         </div>
                     </div>
 

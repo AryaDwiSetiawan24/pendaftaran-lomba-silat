@@ -9,40 +9,28 @@
                         <h2 class="text-2xl font-bold text-white">Detail Peserta</h2>
                         <p class="text-blue-100 text-sm mt-1">Informasi lengkap pendaftaran lomba</p>
                     </div>
-                    @php
-                        $statusConfig = [
-                            'pending' => [
-                                'bg' => 'bg-yellow-100',
-                                'text' => 'text-yellow-700',
-                                'border' => 'border-yellow-300',
-                                'icon' => 'uil-clock',
-                            ],
-                            'approved' => [
-                                'bg' => 'bg-green-100',
-                                'text' => 'text-green-700',
-                                'border' => 'border-green-300',
-                                'icon' => 'uil-check-circle',
-                            ],
-                            'rejected' => [
-                                'bg' => 'bg-red-100',
-                                'text' => 'text-red-700',
-                                'border' => 'border-red-300',
-                                'icon' => 'uil-times-circle',
-                            ],
-                        ];
-                        $status = $statusConfig[$participant->validation_status] ?? [
-                            'bg' => 'bg-gray-100',
-                            'text' => 'text-gray-700',
-                            'border' => 'border-gray-300',
-                            'icon' => 'uil-question-circle',
-                        ];
-                    @endphp
+                    
                     <div
-                        class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 {{ $status['bg'] }} {{ $status['border'] }}">
-                        <i class="uil {{ $status['icon'] }} text-xs lg:text-lg {{ $status['text'] }}"></i>
-                        <span class="font-semibold {{ $status['text'] }}">
-                            {{ ucfirst($participant->validation_status) }}
-                        </span>
+                        class="flex items-center sm:text-lg text-xs gap-2 px-4 py-2 rounded-lg">
+                        @if ($participant->validation_status == 'approved')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 text-green-700 font-semibold">
+                                    <i class="uil uil-check-circle mr-1"></i>
+                                    Disetujui
+                                </span>
+                            @elseif ($participant->validation_status == 'rejected')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-700 font-semibold">
+                                    <i class="uil uil-times-circle mr-1"></i>
+                                    Ditolak
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 font-semibold">
+                                    <i class="uil uil-clock mr-1"></i>
+                                    Pending
+                                </span>
+                            @endif
                     </div>
                 </div>
             </div>
@@ -77,13 +65,13 @@
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Jenis
                                 Kelamin</label>
                             <p class="text-gray-900 font-semibold">
-                                {{ $participant->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}</p>
+                                {{ $participant->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
                         </div>
                         <div class="space-y-1">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Tanggal
                                 Lahir</label>
                             <p class="text-gray-900 font-semibold">
-                                {{ \Carbon\Carbon::parse($participant->birth_date)->format('d F Y') }}</p>
+                                {{ \Carbon\Carbon::parse($participant->date_of_birth)->format('d F Y') }}</p>
                         </div>
                     </div>
                 </div>
@@ -154,7 +142,7 @@
                         Kembali
                     </a>
                     <a href="{{ route('peserta.pendaftaran.edit', $participant->id) }}"
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 font-semibold shadow-sm">
+                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-150 font-semibold shadow-sm">
                         <i class="uil uil-edit"></i>
                         Edit Data
                     </a>

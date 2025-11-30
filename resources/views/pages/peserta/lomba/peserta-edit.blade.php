@@ -1,8 +1,8 @@
 <x-peserta-layout>
     <h2 class="text-2xl font-bold text-red-900 mb-6">Edit Data Peserta</h2>
 
-    <form action="{{ route('peserta.pendaftaran.update', $participant->id) }}" method="POST" enctype="multipart/form-data"
-        class="bg-white shadow rounded-xl p-6 space-y-4">
+    <form id="formUpdate" action="{{ route('peserta.pendaftaran.update', $participant->id) }}" method="POST"
+        enctype="multipart/form-data" class="bg-white shadow rounded-xl p-6 space-y-4">
         @csrf
         @method('PUT')
 
@@ -52,11 +52,13 @@
                 @enderror
             </div>
 
+            
+
             <div>
                 <label class="block text-gray-700 font-semibold mb-1">Tanggal Lahir <span
                         class="text-red-600">*</span></label>
-                <input type="date" name="date_of_birth"
-                    value="{{ old('date_of_birth', $participant->date_of_birth->format('Y-m-d')) }}"
+                <input type="text" id="date_of_birth" name="date_of_birth"
+                    value="{{ $displayDate }}"
                     class="w-full border rounded-lg px-3 py-2 @error('date_of_birth') border-red-500 @enderror">
                 @error('date_of_birth')
                     <p class="text-red-600 text-sm">{{ $message }}</p>
@@ -104,6 +106,8 @@
                         PRA REMAJA (SMP)</option>
                     <option {{ old('category', $participant->category) == 'REMAJA (SMA/K/MA)' ? 'selected' : '' }}>
                         REMAJA (SMA/K/MA)</option>
+                    <option {{ old('category', $participant->category) == 'DEWASA (MAHASISWA/UMUM)' ? 'selected' : '' }}>
+                        DEWASA (MAHASISWA/UMUM)</option>
                 </select>
                 @error('category')
                     <p class="text-red-600 text-sm">{{ $message }}</p>
@@ -166,4 +170,32 @@
                 Perubahan</button>
         </div>
     </form>
+
+    <script>
+        flatpickr("#date_of_birth", {
+            dateFormat: "d/m/Y", // format input
+            allowInput: true, // user boleh mengetik manual
+            disableMobile: true // <<< INI PENTING !!!
+        });
+
+        document.getElementById('formUpdate').addEventListener('submit', function() {
+            let input = document.getElementById('date_of_birth');
+            let value = input.value;
+
+            // Jika user kosongkan atau nilai tidak valid, biarkan Laravel yang validasi
+            if (!value) return;
+
+            // Ekstrak format dd/mm/YYYY → pisah berdasarkan slash
+            let parts = value.split("/");
+
+            if (parts.length === 3) {
+                let day = parts[0];
+                let month = parts[1];
+                let year = parts[2];
+
+                // Konversi ke format Laravel-friendly: YYYY-mm-dd
+                input.value = `${year}-${month}-${day}`;
+            }
+        });
+    </script>
 </x-peserta-layout>

@@ -33,7 +33,7 @@
                     class="w-full mt-1 border rounded-lg p-2" required>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Tempat Lahir <span
                             class="text-red-600">*</span></label>
@@ -43,8 +43,9 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Tanggal Lahir <span
                             class="text-red-600">*</span></label>
-                    <input type="date" name="date_of_birth" value="{{ old('date_of_birth') }}"
-                        class="w-full mt-1 border rounded-lg p-2" required>
+                    <input type="text" id="date_of_birth" name="date_of_birth"
+                        class="w-full mt-1 border rounded-lg p-2" placeholder="dd/mm/yyyy"
+                        value="{{ old('date_of_birth') }}" required>
                 </div>
             </div>
 
@@ -81,7 +82,7 @@
                         <option>USIA DINI 2 (SD)</option>
                         <option>PRA REMAJA (SMP)</option>
                         <option>REMAJA (SMA/K/MA)</option>
-                        {{-- <option>DEWASA (MAHASISWA/UMUM)</option> --}}
+                        <option>DEWASA (MAHASISWA/UMUM)</option>
                     </select>
                 </div>
 
@@ -118,4 +119,12 @@
             </div>
         </form>
     </div>
+
+    <script>
+        flatpickr("#date_of_birth", {
+            dateFormat: "d/m/Y", // format input
+            allowInput: true, // user boleh mengetik manual
+            disableMobile: true // <<< INI PENTING !!!
+        });
+    </script>
 </x-peserta-layout>
