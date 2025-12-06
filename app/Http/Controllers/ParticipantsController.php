@@ -291,6 +291,16 @@ class ParticipantsController extends Controller
         $competition = Competition::findOrFail($request->competition_id);
         $now = Carbon::now();
 
+        // 🔧 FIX FORMAT tanggal sebelum validasi
+        if ($request->date_of_birth) {
+            // Jika format dd/mm/yyyy
+            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $request->date_of_birth)) {
+                $request->merge([
+                    'date_of_birth' => Carbon::createFromFormat('d/m/Y', $request->date_of_birth)->format('Y-m-d')
+                ]);
+            }
+        }
+
         // 🔒 Pembatasan waktu
         if ($now->lt($competition->registration_start_date)) {
             return back()->with('failed', 'Pendaftaran belum dibuka.');
