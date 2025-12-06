@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Schedule;
 use App\Models\Participant;
-use Illuminate\Http\Request;
 use App\Models\TournamentPool;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
@@ -36,7 +35,14 @@ class TournamentPoolController extends Controller
             // Jika weight_class kosong, tentukan sementara (TIDAK DISIMPAN)
             if (empty($class) || $class === 'UNDEF') {
                 switch ($category) {
-                    case 'USIA DINI (SD)':
+
+                    /** ===============================
+                     *  SD (Usia Dini) – Putra/Putri
+                     *  Kelas A s/d G
+                     *  Start 26–28, kelipatan 2 kg
+                     * =============================== */
+                    case 'USIA DINI 1 (SD)':
+                    case 'USIA DINI 2 (SD)':
                         if ($weight >= 26 && $weight <= 28) $class = 'A';
                         elseif ($weight > 28 && $weight <= 30) $class = 'B';
                         elseif ($weight > 30 && $weight <= 32) $class = 'C';
@@ -44,34 +50,74 @@ class TournamentPoolController extends Controller
                         elseif ($weight > 34 && $weight <= 36) $class = 'E';
                         elseif ($weight > 36 && $weight <= 38) $class = 'F';
                         elseif ($weight > 38 && $weight <= 40) $class = 'G';
-                        elseif ($weight > 40 && $weight <= 42) $class = 'H';
-                        elseif ($weight > 42 && $weight <= 44) $class = 'I';
                         break;
 
+                    /** ====================================
+                     *  SMP Putra vs Putri berbeda kelas:
+                     *
+                     *  Putra: A – I   (9 kelas)
+                     *  Putri: A – H   (8 kelas)
+                     *
+                     *  Start: 30–33, kelipatan 3 kg
+                     * ==================================== */
                     case 'PRA REMAJA (SMP)':
-                        if ($weight >= 30 && $weight <= 33) $class = 'A';
-                        elseif ($weight > 33 && $weight <= 36) $class = 'B';
-                        elseif ($weight > 36 && $weight <= 39) $class = 'C';
-                        elseif ($weight > 39 && $weight <= 42) $class = 'D';
-                        elseif ($weight > 42 && $weight <= 45) $class = 'E';
-                        elseif ($weight > 45 && $weight <= 48) $class = 'F';
-                        elseif ($weight > 48 && $weight <= 51) $class = 'G';
-                        elseif ($weight > 51 && $weight <= 54) $class = 'H';
-                        elseif ($weight > 54 && $weight <= 57) $class = 'I';
+
+                        if ($gender === 'L') { // PUTRA
+                            if ($weight >= 30 && $weight <= 33) $class = 'A';
+                            elseif ($weight > 33 && $weight <= 36) $class = 'B';
+                            elseif ($weight > 36 && $weight <= 39) $class = 'C';
+                            elseif ($weight > 39 && $weight <= 42) $class = 'D';
+                            elseif ($weight > 42 && $weight <= 45) $class = 'E';
+                            elseif ($weight > 45 && $weight <= 48) $class = 'F';
+                            elseif ($weight > 48 && $weight <= 51) $class = 'G';
+                            elseif ($weight > 51 && $weight <= 54) $class = 'H';
+                            elseif ($weight > 54 && $weight <= 57) $class = 'I';
+                        } elseif ($gender === 'P') { // PUTRI
+                            if ($weight >= 30 && $weight <= 33) $class = 'A';
+                            elseif ($weight > 33 && $weight <= 36) $class = 'B';
+                            elseif ($weight > 36 && $weight <= 39) $class = 'C';
+                            elseif ($weight > 39 && $weight <= 42) $class = 'D';
+                            elseif ($weight > 42 && $weight <= 45) $class = 'E';
+                            elseif ($weight > 45 && $weight <= 48) $class = 'F';
+                            elseif ($weight > 48 && $weight <= 51) $class = 'G';
+                            elseif ($weight > 51 && $weight <= 54) $class = 'H';
+                        }
                         break;
 
+                    /** ================================================
+                     *  SMA Putra vs Putri:
+                     *
+                     *  Putra: A – H (8 kelas)
+                     *  Putri: A – G (7 kelas)
+                     *
+                     *  Start 39–43, kelipatan 4 kg
+                     * ================================================ */
                     case 'REMAJA (SMA/K/MA)':
-                        if ($weight >= 39 && $weight <= 43) $class = 'A';
-                        elseif ($weight > 43 && $weight <= 47) $class = 'B';
-                        elseif ($weight > 47 && $weight <= 51) $class = 'C';
-                        elseif ($weight > 51 && $weight <= 55) $class = 'D';
-                        elseif ($weight > 55 && $weight <= 59) $class = 'E';
-                        elseif ($weight > 59 && $weight <= 63) $class = 'F';
-                        elseif ($weight > 63 && $weight <= 67) $class = 'G';
-                        elseif ($weight > 67 && $weight <= 71) $class = 'H';
-                        elseif ($weight > 71 && $weight <= 75) $class = 'I';
+
+                        if ($gender === 'L') { // PUTRA
+                            if ($weight >= 39 && $weight <= 43) $class = 'A';
+                            elseif ($weight > 43 && $weight <= 47) $class = 'B';
+                            elseif ($weight > 47 && $weight <= 51) $class = 'C';
+                            elseif ($weight > 51 && $weight <= 55) $class = 'D';
+                            elseif ($weight > 55 && $weight <= 59) $class = 'E';
+                            elseif ($weight > 59 && $weight <= 63) $class = 'F';
+                            elseif ($weight > 63 && $weight <= 67) $class = 'G';
+                            elseif ($weight > 67 && $weight <= 71) $class = 'H';
+                        } elseif ($gender === 'P') { // PUTRI
+                            if ($weight >= 39 && $weight <= 43) $class = 'A';
+                            elseif ($weight > 43 && $weight <= 47) $class = 'B';
+                            elseif ($weight > 47 && $weight <= 51) $class = 'C';
+                            elseif ($weight > 51 && $weight <= 55) $class = 'D';
+                            elseif ($weight > 55 && $weight <= 59) $class = 'E';
+                            elseif ($weight > 59 && $weight <= 63) $class = 'F';
+                            elseif ($weight > 63 && $weight <= 67) $class = 'G';
+                            // Tidak ada kelas H dan I
+                        }
                         break;
 
+                    /** =============================
+                     * DEWASA
+                     * ============================= */
                     case 'DEWASA (MAHASISWA/UMUM)':
                         if ($gender == 'L') {
                             if ($weight >= 45 && $weight <= 50) $class = 'A';
@@ -84,7 +130,7 @@ class TournamentPoolController extends Controller
                             elseif ($weight > 80 && $weight <= 85) $class = 'H';
                             elseif ($weight > 85 && $weight <= 90) $class = 'I';
                             elseif ($weight > 90 && $weight <= 95) $class = 'J';
-                        } elseif ($gender == 'P') {
+                        } else { // P
                             if ($weight >= 45 && $weight <= 50) $class = 'A';
                             elseif ($weight > 50 && $weight <= 55) $class = 'B';
                             elseif ($weight > 55 && $weight <= 60) $class = 'C';
